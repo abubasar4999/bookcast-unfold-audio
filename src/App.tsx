@@ -17,6 +17,7 @@ import AuthorPage from "./pages/AuthorPage";
 import GenrePage from "./pages/GenrePage";
 import ProfilePage from "./pages/ProfilePage";
 import AuthPage from "./pages/AuthPage";
+import GenreSelectionPage from "./pages/GenreSelectionPage";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -58,6 +59,7 @@ const App = () => {
                 <Route path="/genre/:genre" element={<GenrePage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/auth" element={<AuthPage />} />
+                <Route path="/genre-selection" element={<GenreSelectionPage />} />
                 
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={<AdminLogin />} />
