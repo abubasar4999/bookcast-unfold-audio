@@ -235,34 +235,36 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
         </button>
       </div>
 
-      {/* Custom Styles */}
-      <style jsx>{`
-        .featured-carousel .swiper-pagination {
-          bottom: 16px !important;
-        }
-        
-        .swiper-pagination-bullet-custom {
-          width: 8px;
-          height: 8px;
-          background: rgba(255, 255, 255, 0.5);
-          border-radius: 50%;
-          margin: 0 4px;
-          cursor: pointer;
-          transition: all 0.3s ease;
-        }
-        
-        .swiper-pagination-bullet-active-custom {
-          background: white;
-          transform: scale(1.2);
-        }
-        
-        .line-clamp-2 {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      `}</style>
+      {/* Custom Styles using global CSS */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .featured-carousel .swiper-pagination {
+            bottom: 16px !important;
+          }
+          
+          .swiper-pagination-bullet-custom {
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            margin: 0 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+          }
+          
+          .swiper-pagination-bullet-active-custom {
+            background: white;
+            transform: scale(1.2);
+          }
+          
+          .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+        `
+      }} />
     </div>
   );
 };
