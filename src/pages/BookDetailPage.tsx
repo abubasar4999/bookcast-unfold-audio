@@ -5,6 +5,7 @@ import { ArrowDown, Play, Heart } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Book } from '@/hooks/useBooks';
+import RelatedBooksCarousel from '@/components/RelatedBooksCarousel';
 
 const BookDetailPage = () => {
   const { id } = useParams();
@@ -214,6 +215,9 @@ const BookDetailPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Related Books Carousel */}
+      {id && <RelatedBooksCarousel currentBookId={id} />}
     </div>
   );
 };

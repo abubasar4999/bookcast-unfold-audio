@@ -269,6 +269,7 @@ export type Database = {
           created_at: string | null
           full_name: string | null
           id: string
+          onboarding_completed: boolean | null
           phone: string | null
           updated_at: string | null
         }
@@ -276,6 +277,7 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id: string
+          onboarding_completed?: boolean | null
           phone?: string | null
           updated_at?: string | null
         }
@@ -283,8 +285,30 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id?: string
+          onboarding_completed?: boolean | null
           phone?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_genre_preferences: {
+        Row: {
+          created_at: string
+          genre: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          genre: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          genre?: string
+          id?: string
+          user_id?: string
         }
         Relationships: []
       }
