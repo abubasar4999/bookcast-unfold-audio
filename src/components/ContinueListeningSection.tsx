@@ -10,7 +10,7 @@ interface ListeningProgress {
   book_id: string;
   current_position: number;
   duration: number;
-  book: {
+  books: {
     id: string;
     title: string;
     author: string;
@@ -39,7 +39,7 @@ const ContinueListeningSection = () => {
             book_id,
             current_position,
             duration,
-            books:book_id (
+            books (
               id,
               title,
               author,
@@ -56,12 +56,9 @@ const ContinueListeningSection = () => {
           return;
         }
 
-        const mappedData = (data || []).map(item => ({
-          ...item,
-          book: item.books
-        })).filter(item => item.book);
-
-        setListeningProgress(mappedData);
+        // Filter out any records where books is null (shouldn't happen with foreign key, but safety check)
+        const validProgress = (data || []).filter(item => item.books) as ListeningProgress[];
+        setListeningProgress(validProgress);
       } catch (error) {
         console.error('Error:', error);
       } finally {
@@ -102,15 +99,15 @@ const ContinueListeningSection = () => {
         {listeningProgress.map((progress) => (
           <div
             key={progress.id}
-            onClick={() => handleContinueListening(progress.book.id)}
+            onClick={() => handleContinueListening(progress.books.id)}
             className="flex-shrink-0 w-80 bg-gray-800/50 rounded-xl p-4 cursor-pointer hover:bg-gray-800/70 transition-all duration-300 group"
           >
             <div className="flex items-center gap-4">
               {/* Book Cover */}
               <div className="relative">
                 <img
-                  src={progress.book.cover_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop'}
-                  alt={progress.book.title}
+                  src={progress.books.cover_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop'}
+                  alt={progress.books.title}
                   className="w-16 h-20 object-cover rounded-lg"
                 />
                 <div className="absolute inset-0 bg-black/30 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -121,10 +118,10 @@ const ContinueListeningSection = () => {
               {/* Book Info */}
               <div className="flex-1 min-w-0">
                 <h3 className="text-white font-semibold text-sm mb-1 truncate">
-                  {progress.book.title}
+                  {progress.books.title}
                 </h3>
                 <p className="text-gray-400 text-xs mb-2">
-                  {progress.book.author} • {formatTime(progress.duration - progress.current_position)}
+                  {progress.books.author} • {formatTime(progress.duration - progress.current_position)}
                 </p>
                 
                 {/* Progress Bar */}
