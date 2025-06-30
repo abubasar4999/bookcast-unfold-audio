@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBooks } from '@/hooks/useBooks';
+import FeaturedBannerCarousel from '@/components/FeaturedBannerCarousel';
 import NetflixTrendingCarousel from '@/components/NetflixTrendingCarousel';
 import NetflixGenreSelector from '@/components/NetflixGenreSelector';
 import NetflixBookCard from '@/components/NetflixBookCard';
@@ -25,11 +26,16 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-gray-950 pb-20 md:pb-8 md:pt-20">
       {/* Personalized Header */}
-      <div className="px-4 pt-12 md:pt-8 pb-4">
+      <div className="px-4 pt-12 md:pt-8 pb-6">
         <h1 className="text-2xl md:text-4xl font-bold text-white">
           For {getUserFirstName()}
         </h1>
         <p className="text-gray-400 mt-1 text-sm md:text-base">What would you like to listen to today?</p>
+      </div>
+
+      {/* Featured Banner Carousel */}
+      <div className="px-4 mb-8">
+        <FeaturedBannerCarousel />
       </div>
 
       {/* Trending Section */}
