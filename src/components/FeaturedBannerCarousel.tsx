@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
-import { Play, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -32,7 +32,7 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
         const { data, error } = await supabase
           .from('books')
           .select('*')
-          .eq('is_trending', true) // Using is_trending as featured flag
+          .eq('is_trending', true)
           .eq('status', 'active')
           .order('popularity_score', { ascending: false })
           .limit(6);
@@ -57,10 +57,6 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
 
     fetchFeaturedBooks();
   }, []);
-
-  const handleStartListening = (book: Book) => {
-    navigate(`/player/${book.id}`);
-  };
 
   const handleAddToLibrary = async (book: Book) => {
     if (!user) {
@@ -121,7 +117,7 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
       <div className="relative group">
         <Swiper
           modules={[Navigation, Pagination, Autoplay]}
-          spaceBetween={20}
+          spaceBetween={0}
           slidesPerView={1}
           navigation={{
             prevEl: '.swiper-button-prev-custom',
@@ -138,19 +134,6 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
             pauseOnMouseEnter: true,
           }}
           loop={true}
-          breakpoints={{
-            640: {
-              slidesPerView: 1,
-            },
-            768: {
-              slidesPerView: 2,
-              spaceBetween: 24,
-            },
-            1024: {
-              slidesPerView: 2.5,
-              spaceBetween: 32,
-            },
-          }}
           className="featured-carousel"
         >
           {featuredBooks.map((book) => (
@@ -164,9 +147,9 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
                   }}
                 />
                 
-                {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
+                {/* Enhanced Gradient Overlay for better text visibility */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/30" />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
                 
                 {/* Content */}
                 <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-end">
@@ -177,45 +160,33 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
                     </span>
                     
                     {/* Title */}
-                    <h3 className="text-2xl md:text-3xl font-bold text-white leading-tight line-clamp-2">
+                    <h3 className="text-2xl md:text-3xl font-bold text-white leading-tight line-clamp-2 drop-shadow-lg">
                       {book.title}
                     </h3>
                     
                     {/* Author */}
-                    <p className="text-gray-200 text-sm md:text-base">
+                    <p className="text-gray-200 text-sm md:text-base drop-shadow-md">
                       by {book.author}
                     </p>
                     
                     {/* Duration */}
                     {book.duration && (
-                      <p className="text-gray-300 text-xs">
+                      <p className="text-gray-300 text-xs drop-shadow-md">
                         {book.duration}
                       </p>
                     )}
                     
-                    {/* Action Buttons */}
-                    <div className="flex gap-3 pt-2">
-                      <Button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleStartListening(book);
-                        }}
-                        className="bg-white text-black hover:bg-gray-100 font-semibold px-6 py-2 rounded-full transition-all duration-200 transform hover:scale-105"
-                      >
-                        <Play size={16} className="mr-2 fill-black" />
-                        Start Listening
-                      </Button>
-                      
+                    {/* CTA Button */}
+                    <div className="pt-2">
                       <Button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleAddToLibrary(book);
                         }}
-                        variant="outline"
-                        className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 transition-all duration-200 transform hover:scale-105"
+                        className="bg-white/90 text-black hover:bg-white font-semibold px-6 py-3 rounded-full transition-all duration-200 transform hover:scale-105 backdrop-blur-sm border border-white/20"
                       >
-                        <Plus size={16} className="mr-1" />
-                        Library
+                        <Plus size={16} className="mr-2" />
+                        + Library
                       </Button>
                     </div>
                   </div>
@@ -226,11 +197,11 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
         </Swiper>
 
         {/* Custom Navigation Arrows */}
-        <button className="swiper-button-prev-custom absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/30 hover:bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110">
+        <button className="swiper-button-prev-custom absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110">
           <ChevronLeft size={20} />
         </button>
         
-        <button className="swiper-button-next-custom absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/30 hover:bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110">
+        <button className="swiper-button-next-custom absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110">
           <ChevronRight size={20} />
         </button>
       </div>
@@ -262,6 +233,15 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+          }
+          
+          .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+          
+          .scrollbar-hide::-webkit-scrollbar {
+            display: none;
           }
         `
       }} />

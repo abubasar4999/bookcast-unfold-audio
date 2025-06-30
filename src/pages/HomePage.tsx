@@ -1,16 +1,11 @@
 
-import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useBooks } from '@/hooks/useBooks';
 import FeaturedBannerCarousel from '@/components/FeaturedBannerCarousel';
-import NetflixTrendingCarousel from '@/components/NetflixTrendingCarousel';
-import NetflixGenreSelector from '@/components/NetflixGenreSelector';
-import NetflixBookCard from '@/components/NetflixBookCard';
+import ContinueListeningSection from '@/components/ContinueListeningSection';
+import GenreCarousel from '@/components/GenreCarousel';
 
 const HomePage = () => {
   const { user } = useAuth();
-  const [selectedGenre, setSelectedGenre] = useState('all');
-  const { data: books, isLoading, error } = useBooks(selectedGenre);
 
   // Extract user's first name from full_name or email
   const getUserFirstName = () => {
@@ -23,6 +18,18 @@ const HomePage = () => {
     return 'there';
   };
 
+  const genres = [
+    { title: 'Newly Added', isNewlyAdded: true },
+    { title: 'Fiction Picks', genre: 'Fiction' },
+    { title: 'Romance', genre: 'Romance' },
+    { title: 'Thriller', genre: 'Thriller' },
+    { title: 'Fantasy', genre: 'Fantasy' },
+    { title: 'Sci-Fi', genre: 'Sci-Fi' },
+    { title: 'Mystery', genre: 'Mystery' },
+    { title: 'Biography', genre: 'Biography' },
+    { title: 'Non-fiction Highlights', genre: 'Non-fiction' },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-950 pb-20 md:pb-8 md:pt-20">
       {/* Personalized Header */}
@@ -33,44 +40,24 @@ const HomePage = () => {
         <p className="text-gray-400 mt-1 text-sm md:text-base">What would you like to listen to today?</p>
       </div>
 
-      {/* Featured Banner Carousel */}
+      {/* Trending Now Banner Carousel */}
       <div className="px-4 mb-8">
+        <h2 className="text-xl md:text-2xl font-bold text-white mb-6">Trending Now</h2>
         <FeaturedBannerCarousel />
       </div>
 
-      {/* Trending Section */}
-      <NetflixTrendingCarousel />
+      {/* Continue Listening Section */}
+      <ContinueListeningSection />
 
-      {/* Genre Selection */}
-      <NetflixGenreSelector 
-        selectedGenre={selectedGenre} 
-        onGenreSelect={setSelectedGenre} 
-      />
-
-      {/* Popular Books Grid */}
-      <div className="px-4 pb-8">
-        <h2 className="text-xl md:text-2xl font-bold text-white mb-6">
-          {selectedGenre === 'all' ? 'Popular Books' : `Popular ${selectedGenre.charAt(0).toUpperCase() + selectedGenre.slice(1)} Books`}
-        </h2>
-        
-        {isLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {[...Array(10)].map((_, i) => (
-              <div key={i} className="w-full h-56 md:h-64 bg-gray-800 rounded-lg animate-pulse" />
-            ))}
-          </div>
-        ) : error || !books?.length ? (
-          <div className="text-center py-12">
-            <p className="text-gray-400 text-lg">No books found for this genre.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {books.map((book) => (
-              <NetflixBookCard key={book.id} book={book} size="medium" />
-            ))}
-          </div>
-        )}
-      </div>
+      {/* Genre-Based Carousels */}
+      {genres.map((genreData) => (
+        <GenreCarousel
+          key={genreData.title}
+          title={genreData.title}
+          genre={genreData.genre}
+          isNewlyAdded={genreData.isNewlyAdded}
+        />
+      ))}
     </div>
   );
 };
