@@ -30,8 +30,7 @@ const NetflixTrendingCarousel = () => {
           <NetflixBookCard 
             key={book.id} 
             book={book} 
-            size="large" 
-            showStartListening={true}
+            size="large"
           />
         ))}
       </div>
