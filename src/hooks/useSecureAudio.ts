@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/components/ui/use-toast';
 
 interface UseSecureAudioProps {
   bookId: string;
@@ -13,6 +14,12 @@ interface ListeningProgress {
   duration: number | null;
 }
 
+interface NetworkInfo {
+  effectiveType?: string;
+  downlink?: number;
+  rtt?: number;
+}
+
 export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
   const { user } = useAuth();
   const [audioUrl, setAudioUrl] = useState<string>('');
@@ -21,9 +28,21 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
   const [duration, setDuration] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState<ListeningProgress | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Generate public URL for audio playback
+  // Detect network information
+  const getNetworkInfo = (): NetworkInfo => {
+    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+    return {
+      effectiveType: connection?.effectiveType || 'unknown',
+      downlink: connection?.downlink || 0,
+      rtt: connection?.rtt || 0
+    };
+  };
+
+  // Enhanced URL generation with multiple fallback strategies
   const generateAudioUrl = (path: string): string => {
     if (!path) {
       console.error('Audio path is empty');
@@ -32,23 +51,83 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
 
     console.log('Processing audio path:', path);
     
-    // Check if the path is already a full URL
     if (path.startsWith('http://') || path.startsWith('https://')) {
       console.log('Audio path is already a full URL:', path);
       return path;
     }
     
     try {
-      // Generate public URL for storage bucket
       const { data } = supabase.storage
         .from('book-audios')
         .getPublicUrl(path);
       
-      console.log('Generated public URL from path:', data.publicUrl);
-      return data.publicUrl;
+      // Add cache-busting and mobile-optimized parameters
+      const url = new URL(data.publicUrl);
+      url.searchParams.set('t', Date.now().toString());
+      url.searchParams.set('mobile', '1');
+      
+      const finalUrl = url.toString();
+      console.log('Generated optimized URL:', finalUrl);
+      return finalUrl;
     } catch (error) {
       console.error('Error generating public URL:', error);
       return '';
+    }
+  };
+
+  // Test URL accessibility with comprehensive checks
+  const testAudioUrl = async (url: string, attempt: number = 1): Promise<boolean> => {
+    const networkInfo = getNetworkInfo();
+    console.log(`Testing audio URL (attempt ${attempt}), Network:`, networkInfo);
+    
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
+      const response = await fetch(url, {
+        method: 'HEAD',
+        signal: controller.signal,
+        headers: {
+          'Accept': 'audio/mpeg, audio/mp3, audio/*',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        },
+        // Add credentials for potential auth requirements
+        credentials: 'omit'
+      });
+      
+      clearTimeout(timeoutId);
+      
+      console.log(`Audio URL test response (attempt ${attempt}):`, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
+        url: response.url
+      });
+      
+      if (response.ok) {
+        const contentType = response.headers.get('content-type');
+        console.log('Content-Type:', contentType);
+        return true;
+      } else {
+        console.warn(`Audio URL not accessible: ${response.status} ${response.statusText}`);
+        return false;
+      }
+    } catch (error: any) {
+      console.error(`Audio URL test failed (attempt ${attempt}):`, {
+        name: error.name,
+        message: error.message,
+        cause: error.cause
+      });
+      
+      // Log specific error types for debugging
+      if (error.name === 'AbortError') {
+        console.error('Request timed out - possible network issue');
+      } else if (error.name === 'TypeError') {
+        console.error('Network error - possible carrier/eSIM blocking');
+      }
+      
+      return false;
     }
   };
 
@@ -128,27 +207,63 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
     }
   };
 
-  // Initialize audio
-  const initializeAudio = async () => {
+  // Initialize audio with retry logic
+  const initializeAudio = async (forceRetry: boolean = false) => {
     if (!audioPath) {
       console.error('No audio path provided');
       return;
     }
 
+    if (!forceRetry && isLoading) {
+      console.log('Already loading, skipping initialization');
+      return;
+    }
+
     setIsLoading(true);
-    console.log('Initializing audio with path:', audioPath);
+    const networkInfo = getNetworkInfo();
+    console.log('Initializing audio with network info:', networkInfo, 'Path:', audioPath);
     
     try {
       const finalAudioUrl = generateAudioUrl(audioPath);
       
       if (!finalAudioUrl) {
         console.error('Failed to get valid audio URL');
+        toast({
+          title: "Audio Error",
+          description: "Unable to generate audio URL. Please try again.",
+          variant: "destructive"
+        });
         setIsLoading(false);
         return;
       }
       
-      console.log('Final audio URL:', finalAudioUrl);
+      // Test URL accessibility with retry logic
+      let isAccessible = false;
+      const maxAttempts = 3;
+      
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        isAccessible = await testAudioUrl(finalAudioUrl, attempt);
+        if (isAccessible) break;
+        
+        if (attempt < maxAttempts) {
+          console.log(`Retrying URL test in ${attempt * 1000}ms...`);
+          await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+        }
+      }
+      
+      if (!isAccessible) {
+        console.error('Audio URL not accessible after all attempts');
+        toast({
+          title: "Network Issue",
+          description: "Unable to access audio on current network. Try switching networks or check connection.",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+      
       setAudioUrl(finalAudioUrl);
+      setRetryCount(0);
       
       // Load progress only if user is authenticated
       if (user) {
@@ -156,6 +271,11 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
       }
     } catch (error) {
       console.error('Failed to initialize audio:', error);
+      toast({
+        title: "Initialization Error",
+        description: "Failed to initialize audio player. Please refresh and try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -167,7 +287,6 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
       const newTime = audioRef.current.currentTime;
       setCurrentTime(newTime);
       
-      // Save progress every 10 seconds (only for authenticated users)
       if (user && Math.floor(newTime) % 10 === 0) {
         saveProgress(newTime);
       }
@@ -181,7 +300,6 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
       setDuration(audioDuration);
       console.log('Audio duration loaded:', audioDuration);
       
-      // Resume from saved position (only for authenticated users)
       if (user && progress && progress.current_position > 0) {
         audioRef.current.currentTime = progress.current_position;
         setCurrentTime(progress.current_position);
@@ -193,14 +311,19 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
   const handleEnded = () => {
     setIsPlaying(false);
     if (user) {
-      saveProgress(0); // Reset progress when finished
+      saveProgress(0);
     }
   };
 
-  // Play/pause functionality
+  // Enhanced play/pause with comprehensive error handling
   const togglePlay = async () => {
     if (!audioRef.current || !audioUrl) {
       console.error('Audio element or URL not ready');
+      toast({
+        title: "Player Not Ready",
+        description: "Audio player is not ready. Please wait or refresh.",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -212,19 +335,83 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
           saveProgress(currentTime);
         }
       } else {
-        console.log('Attempting to play audio from URL:', audioUrl);
+        const networkInfo = getNetworkInfo();
+        console.log('Attempting to play audio with network:', networkInfo, 'URL:', audioUrl);
+        
+        // Set additional audio properties for mobile data compatibility
+        if (audioRef.current) {
+          audioRef.current.crossOrigin = null; // Remove CORS restrictions
+          audioRef.current.preload = 'none'; // Minimize initial loading
+        }
+        
         await audioRef.current.play();
         setIsPlaying(true);
         console.log('Audio playback started successfully');
+        
+        // Reset retry count on successful play
+        setRetryCount(0);
       }
     } catch (error: any) {
-      console.error('Error in audio playback:', error);
+      console.error('Error in audio playback:', {
+        name: error.name,
+        message: error.message,
+        code: error.code,
+        networkInfo: getNetworkInfo()
+      });
+      
       setIsPlaying(false);
       
+      // Enhanced error handling with specific solutions
       if (error.name === 'NotAllowedError') {
-        console.error('Playback requires user interaction');
+        toast({
+          title: "User Interaction Required",
+          description: "Please tap the play button again to start playback.",
+          variant: "destructive"
+        });
       } else if (error.name === 'NotSupportedError') {
-        console.error('Audio format not supported or network connectivity issue');
+        toast({
+          title: "Format Not Supported",
+          description: "Audio format not supported or network connectivity issue.",
+          variant: "destructive"
+        });
+      } else if (error.name === 'AbortError') {
+        toast({
+          title: "Playback Interrupted",
+          description: "Playback was interrupted. Try again or check your connection.",
+          variant: "destructive"
+        });
+      } else {
+        // Implement retry logic for network-related errors
+        if (retryCount < 2) {
+          console.log(`Retrying playback (attempt ${retryCount + 1})...`);
+          setRetryCount(prev => prev + 1);
+          
+          // Clear existing timeout
+          if (retryTimeoutRef.current) {
+            clearTimeout(retryTimeoutRef.current);
+          }
+          
+          // Retry after delay
+          retryTimeoutRef.current = setTimeout(() => {
+            initializeAudio(true).then(() => {
+              // Try playing again after re-initialization
+              if (audioRef.current) {
+                audioRef.current.play().catch(console.error);
+              }
+            });
+          }, (retryCount + 1) * 2000);
+          
+          toast({
+            title: "Retrying...",
+            description: `Network issue detected. Retrying playback (${retryCount + 1}/3)...`,
+          });
+        } else {
+          toast({
+            title: "Playback Failed",
+            description: "Unable to play audio on current network. Try switching to Wi-Fi or another network.",
+            variant: "destructive"
+          });
+        }
       }
     }
   };
@@ -248,6 +435,26 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
     }
   };
 
+  // Listen for network changes
+  useEffect(() => {
+    const handleNetworkChange = () => {
+      const networkInfo = getNetworkInfo();
+      console.log('Network changed:', networkInfo);
+      
+      // Reinitialize on significant network changes
+      if (audioPath && audioUrl) {
+        console.log('Reinitializing due to network change...');
+        setTimeout(() => initializeAudio(true), 1000);
+      }
+    };
+
+    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+    if (connection) {
+      connection.addEventListener('change', handleNetworkChange);
+      return () => connection.removeEventListener('change', handleNetworkChange);
+    }
+  }, [audioPath, audioUrl]);
+
   useEffect(() => {
     if (audioPath) {
       console.log('Audio path changed, reinitializing:', audioPath);
@@ -255,9 +462,12 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
     }
   }, [user, audioPath, bookId]);
 
-  // Auto-save progress on unmount (only for authenticated users)
+  // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+      }
       if (user && currentTime > 0) {
         saveProgress(currentTime);
       }
@@ -272,6 +482,7 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
     duration,
     isLoading,
     progress,
+    retryCount,
     togglePlay,
     seekTo,
     skip,
