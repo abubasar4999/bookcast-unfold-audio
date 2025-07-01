@@ -7,7 +7,7 @@ export const generateAudioUrl = (path: string, isMobile: boolean): string => {
     return '';
   }
 
-  console.log('Generating audio URL for mobile:', isMobile, 'path:', path);
+  console.log('Generating audio URL for path:', path, 'mobile:', isMobile);
   
   // If it's already a full URL, return as is
   if (path.startsWith('http://') || path.startsWith('https://')) {
@@ -23,14 +23,6 @@ export const generateAudioUrl = (path: string, isMobile: boolean): string => {
     
     let finalUrl = data.publicUrl;
     
-    // Add mobile-specific URL parameters for better compatibility
-    if (isMobile) {
-      const urlObj = new URL(finalUrl);
-      urlObj.searchParams.set('t', Date.now().toString()); // Cache busting
-      urlObj.searchParams.set('mobile', '1'); // Mobile indicator
-      finalUrl = urlObj.toString();
-    }
-    
     console.log('Generated audio URL:', finalUrl);
     return finalUrl;
   } catch (error) {
@@ -43,16 +35,30 @@ export const testAudioUrl = async (url: string): Promise<boolean> => {
   try {
     console.log('Testing audio URL accessibility:', url);
     
-    // For mobile, try a simpler approach
+    // First try a simple fetch with GET method
     const response = await fetch(url, { 
-      method: 'HEAD',
+      method: 'GET',
+      mode: 'cors',
       cache: 'no-cache'
     });
     
     console.log('Audio URL test response:', response.status, response.statusText);
+    
+    // If it's a 400, the file likely doesn't exist
+    if (response.status === 400) {
+      console.error('File not found or access denied (400)');
+      return false;
+    }
+    
     return response.ok;
   } catch (error) {
     console.error('Audio URL test failed:', error);
     return false;
   }
+};
+
+// Add a function to get demo audio URL as fallback
+export const getDemoAudioUrl = (): string => {
+  // Use a reliable demo audio file
+  return 'https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3';
 };

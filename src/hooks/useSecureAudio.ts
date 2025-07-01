@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/use-toast';
 import { UseSecureAudioProps, ListeningProgress } from '@/types/audio';
-import { generateAudioUrl, testAudioUrl } from '@/utils/audioUrlUtils';
+import { generateAudioUrl, testAudioUrl, getDemoAudioUrl } from '@/utils/audioUrlUtils';
 import { loadListeningProgress, saveListeningProgress } from '@/utils/progressUtils';
 import { detectMobileDevice, isSlowNetwork } from '@/utils/networkUtils';
 
@@ -16,6 +16,7 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState<ListeningProgress | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [usingDemoAudio, setUsingDemoAudio] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const isMobile = detectMobileDevice();
@@ -36,47 +37,37 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
     console.log('Initializing audio:', { audioPath, isMobile, isSlowNet });
     
     try {
-      const finalAudioUrl = generateAudioUrl(audioPath, isMobile);
+      let finalAudioUrl = generateAudioUrl(audioPath, isMobile);
       
       if (!finalAudioUrl) {
         console.error('Failed to get valid audio URL');
-        toast({
-          title: "Audio Error",
-          description: "Unable to generate audio URL. Please try again.",
-          variant: "destructive"
-        });
-        setIsLoading(false);
-        return;
+        throw new Error('Unable to generate audio URL');
       }
 
       // Test URL accessibility
       const isAccessible = await testAudioUrl(finalAudioUrl);
+      
       if (!isAccessible) {
-        console.error('Audio URL is not accessible');
+        console.error('Primary audio URL is not accessible, using demo audio');
         
-        if (retryCount < 2) {
-          console.log('Retrying audio initialization...');
-          setRetryCount(prev => prev + 1);
-          setTimeout(() => initializeAudio(true), 1000);
-          return;
-        }
+        // Use demo audio as fallback
+        finalAudioUrl = getDemoAudioUrl();
+        setUsingDemoAudio(true);
         
         toast({
-          title: "Network Issue",
-          description: isMobile 
-            ? "Audio file is not accessible on mobile network. Please check your connection or try Wi-Fi."
-            : "Audio file is not accessible. Please check your connection.",
-          variant: "destructive"
+          title: "Using Demo Audio",
+          description: "The requested audio file is not available. Playing demo audio instead.",
+          variant: "default"
         });
-        setIsLoading(false);
-        return;
+      } else {
+        setUsingDemoAudio(false);
       }
       
       setAudioUrl(finalAudioUrl);
       setRetryCount(0);
       
-      // Load progress only if user is authenticated
-      if (user) {
+      // Load progress only if user is authenticated and not using demo
+      if (user && !usingDemoAudio) {
         const userProgress = await loadListeningProgress(user.id, bookId);
         if (userProgress) {
           setProgress(userProgress);
@@ -85,10 +76,16 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
       }
     } catch (error) {
       console.error('Failed to initialize audio:', error);
+      
+      // Fallback to demo audio
+      const demoUrl = getDemoAudioUrl();
+      setAudioUrl(demoUrl);
+      setUsingDemoAudio(true);
+      
       toast({
-        title: "Initialization Error",
-        description: "Failed to initialize audio player. Please refresh and try again.",
-        variant: "destructive"
+        title: "Using Demo Audio",
+        description: "Unable to load the requested audio. Playing demo audio instead.",
+        variant: "default"
       });
     } finally {
       setIsLoading(false);
@@ -100,8 +97,8 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
       const newTime = audioRef.current.currentTime;
       setCurrentTime(newTime);
       
-      // Save progress every 10 seconds
-      if (user && Math.floor(newTime) % 10 === 0) {
+      // Save progress every 10 seconds (only for real audio, not demo)
+      if (user && !usingDemoAudio && Math.floor(newTime) % 10 === 0) {
         saveListeningProgress(user.id, bookId, newTime, duration);
       }
     }
@@ -113,8 +110,8 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
       setDuration(audioDuration);
       console.log('Audio duration loaded:', audioDuration);
       
-      // Resume from saved position
-      if (user && progress && progress.current_position > 0) {
+      // Resume from saved position (only for real audio, not demo)
+      if (user && progress && progress.current_position > 0 && !usingDemoAudio) {
         audioRef.current.currentTime = progress.current_position;
         setCurrentTime(progress.current_position);
       }
@@ -123,7 +120,7 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
 
   const handleEnded = () => {
     setIsPlaying(false);
-    if (user) {
+    if (user && !usingDemoAudio) {
       saveListeningProgress(user.id, bookId, 0, duration);
     }
   };
@@ -143,11 +140,11 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
       if (isPlaying) {
         audioRef.current.pause();
         setIsPlaying(false);
-        if (user) {
+        if (user && !usingDemoAudio) {
           saveListeningProgress(user.id, bookId, currentTime, duration);
         }
       } else {
-        console.log('Attempting to play audio:', { isMobile, audioUrl });
+        console.log('Attempting to play audio:', { isMobile, audioUrl, usingDemoAudio });
         
         // Mobile-specific preparation
         if (isMobile) {
@@ -177,22 +174,13 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
       } else if (error.name === 'NotSupportedError') {
         toast({
           title: "Format Not Supported",
-          description: isMobile 
-            ? "Audio format not supported on this device/network. Please try a different network."
-            : "Audio format not supported. Please try refreshing the page.",
+          description: "This audio format is not supported on your device.",
           variant: "destructive"
         });
-        
-        if (retryCount < 2) {
-          setRetryCount(prev => prev + 1);
-          setTimeout(() => initializeAudio(true), 1000);
-        }
       } else {
         toast({
           title: "Playback Failed",
-          description: isMobile 
-            ? "Unable to play audio on mobile. Please check your network connection."
-            : "Unable to play audio. Please check your connection.",
+          description: "Unable to play audio. Please check your connection.",
           variant: "destructive"
         });
       }
@@ -203,7 +191,7 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
     if (audioRef.current) {
       audioRef.current.currentTime = time;
       setCurrentTime(time);
-      if (user) {
+      if (user && !usingDemoAudio) {
         saveListeningProgress(user.id, bookId, time, duration);
       }
     }
@@ -225,11 +213,11 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
 
   useEffect(() => {
     return () => {
-      if (user && currentTime > 0) {
+      if (user && currentTime > 0 && !usingDemoAudio) {
         saveListeningProgress(user.id, bookId, currentTime, duration);
       }
     };
-  }, [currentTime, user, bookId, duration]);
+  }, [currentTime, user, bookId, duration, usingDemoAudio]);
 
   return {
     audioRef,
@@ -241,6 +229,7 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
     progress,
     retryCount,
     isMobile,
+    usingDemoAudio,
     togglePlay,
     seekTo,
     skip,
