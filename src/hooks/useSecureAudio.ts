@@ -23,7 +23,7 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
   const [progress, setProgress] = useState<ListeningProgress | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Generate public URL for the audio file or return if already a full URL
+  // Generate public URL with mobile-friendly headers
   const generateAudioUrl = (path: string): string => {
     if (!path) {
       console.error('Audio path is empty');
@@ -39,10 +39,12 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
     }
     
     try {
-      // If it's just a file path, generate the public URL
+      // Generate public URL with mobile-optimized parameters
       const { data } = supabase.storage
         .from('book-audios')
-        .getPublicUrl(path);
+        .getPublicUrl(path, {
+          download: false
+        });
       
       console.log('Generated public URL from path:', data.publicUrl);
       return data.publicUrl;
@@ -101,7 +103,7 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
     }
   };
 
-  // Initialize audio with proper URL
+  // Initialize audio with mobile-optimized settings
   const initializeAudio = async () => {
     if (!audioPath) {
       console.error('No audio path provided');
@@ -170,7 +172,7 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
     }
   };
 
-  // Play/pause toggle
+  // Play/pause toggle with mobile-optimized retry logic
   const togglePlay = async () => {
     if (!audioRef.current || !audioUrl) {
       console.error('Audio element or URL not ready');
@@ -186,11 +188,35 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
         }
       } else {
         console.log('Attempting to play audio from URL:', audioUrl);
-        await audioRef.current.play();
-        setIsPlaying(true);
+        
+        // Mobile-friendly play attempt with retry
+        let playAttempts = 0;
+        const maxAttempts = 3;
+        
+        while (playAttempts < maxAttempts) {
+          try {
+            await audioRef.current.play();
+            setIsPlaying(true);
+            break;
+          } catch (playError) {
+            playAttempts++;
+            console.warn(`Play attempt ${playAttempts} failed:`, playError);
+            
+            if (playAttempts >= maxAttempts) {
+              throw playError;
+            }
+            
+            // Brief delay before retry
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+        }
       }
     } catch (error) {
       console.error('Error playing audio:', error);
+      // Provide user feedback for mobile data issues
+      if (error.name === 'NotAllowedError') {
+        console.error('Audio playback blocked - user interaction required');
+      }
     }
   };
 

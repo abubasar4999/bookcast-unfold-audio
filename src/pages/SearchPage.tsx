@@ -12,13 +12,14 @@ const SearchPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAllTrendingGuests, setShowAllTrendingGuests] = useState(false);
   const [showAllPopularEpisodes, setShowAllPopularEpisodes] = useState(false);
+  const [showAllMostLiked, setShowAllMostLiked] = useState(false);
   const { data: searchResults = [], isLoading: isSearching } = useSearchBooks(searchQuery);
   const { data: authors = [], isLoading: isLoadingAuthors } = useAuthors();
   const { data: allBooks = [], isLoading: isLoadingBooks } = useBooks();
   const { data: trendingBooks = [], isLoading: isLoadingTrending } = useTrendingBooks();
   const navigate = useNavigate();
 
-  // Genre data matching your existing app's genres with updated theme colors
+  // Genre data with app's color theme
   const genres = [
     { name: 'Motivational', icon: '🎯', color: 'bg-gradient-to-r from-purple-600 to-blue-600' },
     { name: 'Fiction', icon: '📚', color: 'bg-gradient-to-r from-blue-600 to-indigo-600' },
@@ -42,23 +43,23 @@ const SearchPage = () => {
     navigate(`/book/${bookId}`);
   };
 
-  // Get trending authors (top 4 for initial display, all for modal)
+  // Get trending authors
   const trendingAuthors = authors.slice(0, showAllTrendingGuests ? authors.length : 4);
   
-  // Get popular authors with mock episode/like counts
-  const popularAuthors = authors.slice(0, 8).map((author, index) => ({
+  // Get popular authors with mock data - show only 4 initially
+  const popularAuthors = authors.slice(0, showAllMostLiked ? authors.length : 4).map((author, index) => ({
     ...author,
     episodeCount: [12, 8, 15, 6, 9, 11, 7, 13][index] || 5,
     likeCount: [4.8, 3.2, 5.7, 2.9, 4.1, 3.8, 2.5, 4.6][index] || 3.5
   }));
 
-  // Get featured books (popular episodes equivalent)
+  // Get featured books
   const featuredBooks = showAllPopularEpisodes 
     ? (trendingBooks.length > 0 ? trendingBooks : allBooks.slice(0, 10))
     : (trendingBooks.length > 0 ? trendingBooks.slice(0, 3) : allBooks.slice(0, 3));
 
   return (
-    <div className="min-h-screen bg-gray-950 pt-12 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950/20 pt-12 pb-20">
       {/* Search Bar */}
       <div className="px-4 mb-6">
         <div className="relative">
@@ -75,26 +76,26 @@ const SearchPage = () => {
 
       {!searchQuery ? (
         <>
-          {/* Browse by Genre - Updated to pill-shaped buttons */}
+          {/* Browse by Genre - Mobile-optimized pill buttons */}
           <div className="px-4 mb-8">
             <h2 className="text-xl font-bold text-white mb-4">Browse by Genre</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
               {genres.map((genre, index) => (
                 <button
                   key={index}
                   onClick={() => handleGenreClick(genre.name)}
-                  className={`${genre.color} rounded-full p-4 text-white text-left hover:opacity-90 hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl`}
+                  className={`${genre.color} rounded-full p-3 md:p-4 text-white text-left hover:opacity-90 hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl`}
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{genre.icon}</span>
-                    <span className="font-medium">{genre.name}</span>
+                  <div className="flex items-center gap-1.5 md:gap-2">
+                    <span className="text-sm md:text-lg">{genre.icon}</span>
+                    <span className="font-medium text-xs md:text-sm">{genre.name}</span>
                   </div>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Trending Authors - Updated with working See All */}
+          {/* Trending Authors */}
           <div className="px-4 mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white">Trending Guest</h2>
@@ -139,20 +140,21 @@ const SearchPage = () => {
             )}
           </div>
 
-          {/* Most Liked Authors - Updated to grid layout */}
+          {/* Most Liked Guests - Show only 4, with View All button */}
           <div className="px-4 mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white">Most Liked Guests</h2>
               <Button
                 variant="ghost"
+                onClick={() => setShowAllMostLiked(!showAllMostLiked)}
                 className="text-purple-500 hover:text-purple-400 text-sm font-medium hover:bg-purple-500/10"
               >
-                View all
+                {showAllMostLiked ? 'Show Less' : 'View All'}
               </Button>
             </div>
             {isLoadingAuthors ? (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[...Array(8)].map((_, i) => (
+                {[...Array(4)].map((_, i) => (
                   <div key={i} className="bg-gray-800 rounded-lg p-4 animate-pulse">
                     <div className="w-16 h-16 bg-gray-700 rounded-full mx-auto mb-3" />
                     <div className="h-4 bg-gray-700 rounded mb-2" />
@@ -161,7 +163,7 @@ const SearchPage = () => {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 ${showAllMostLiked ? '' : ''}`}>
                 {popularAuthors.map((author) => (
                   <div
                     key={author.id}
@@ -195,7 +197,7 @@ const SearchPage = () => {
             )}
           </div>
 
-          {/* Popular Episodes (Featured Books) - Updated with working See All */}
+          {/* Popular Episodes */}
           <div className="px-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white">Popular Episodes</h2>

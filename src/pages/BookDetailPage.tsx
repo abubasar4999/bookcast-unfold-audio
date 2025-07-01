@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Book } from '@/hooks/useBooks';
 import RelatedBooksCarousel from '@/components/RelatedBooksCarousel';
+import PersonalizedRecommendations from '@/components/PersonalizedRecommendations';
 
 const BookDetailPage = () => {
   const { id } = useParams();
@@ -62,7 +63,7 @@ const BookDetailPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950/20 flex items-center justify-center">
         <div className="text-white text-lg">Loading...</div>
       </div>
     );
@@ -70,14 +71,14 @@ const BookDetailPage = () => {
 
   if (!book) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950/20 flex items-center justify-center">
         <div className="text-white text-lg">Book not found</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950/20 pb-20">
       {/* Hero Section with Book Cover */}
       <div className="relative h-[70vh] overflow-hidden">
         <div className="absolute inset-0">
@@ -154,7 +155,7 @@ const BookDetailPage = () => {
       {/* Content Section */}
       <div className="px-4 py-6 space-y-6">
         {/* Public Access Notice */}
-        <div className="bg-green-800/20 rounded-xl p-4 border-l-4 border-green-500">
+        <div className="bg-gradient-to-r from-green-800/20 to-emerald-800/20 rounded-xl p-4 border-l-4 border-green-500">
           <h3 className="text-white font-semibold mb-2 flex items-center">
             🎵 Free Public Access
           </h3>
@@ -165,7 +166,7 @@ const BookDetailPage = () => {
         </div>
 
         {/* Book Info */}
-        <div className="bg-gray-900 rounded-xl p-4">
+        <div className="bg-gradient-to-r from-gray-900/50 to-gray-800/50 rounded-xl p-4 backdrop-blur-sm">
           <h3 className="text-white font-semibold mb-2">Book Details</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
@@ -199,21 +200,11 @@ const BookDetailPage = () => {
           </div>
         )}
 
-        {/* Features */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-gray-900/50 rounded-lg p-3">
-            <div className="text-purple-400 text-sm font-semibold">
-              {user ? 'Resume Playback' : 'Free Access'}
-            </div>
-            <div className="text-gray-400 text-xs">
-              {user ? 'Pick up where you left off' : 'No login required'}
-            </div>
-          </div>
-          <div className="bg-gray-900/50 rounded-lg p-3">
-            <div className="text-purple-400 text-sm font-semibold">Variable Speed</div>
-            <div className="text-gray-400 text-xs">0.75x to 2x playback</div>
-          </div>
-        </div>
+        {/* Personalized Recommendations - Replaces the features grid */}
+        <PersonalizedRecommendations 
+          currentBookId={id || ''}
+          currentBookGenre={book.genre}
+        />
       </div>
 
       {/* Related Books Carousel */}

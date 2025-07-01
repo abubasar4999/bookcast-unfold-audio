@@ -1,8 +1,14 @@
 
 import React from 'react';
-import { Play, Pause, SkipBack, SkipForward, RotateCcw, Gauge } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, RotateCcw, ChevronDown } from 'lucide-react';
 import { useSecureAudio } from '@/hooks/useSecureAudio';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface SecureAudioPlayerProps {
   bookId: string;
@@ -76,7 +82,7 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
 
   return (
     <div className="w-full">
-      {/* Hidden audio element with optimizations */}
+      {/* Hidden audio element with mobile data optimizations */}
       <audio
         ref={audioRef}
         src={audioUrl}
@@ -85,6 +91,8 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={handleEnded}
         className="hidden"
+        crossOrigin="anonymous"
+        playsInline
       />
 
       {/* Progress Bar */}
@@ -110,13 +118,6 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
           <div className="flex items-center text-purple-400 text-xs mt-1">
             <RotateCcw size={12} className="mr-1" />
             <span>Resume from {formatTime(progress.current_position)}</span>
-          </div>
-        )}
-
-        {/* Guest notice */}
-        {!user && (
-          <div className="flex items-center text-yellow-400 text-xs mt-1">
-            <span>👤 Sign in to save your listening progress</span>
           </div>
         )}
       </div>
@@ -152,25 +153,27 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
         </button>
       </div>
 
-      {/* Enhanced Playback Speed Control */}
+      {/* Dropdown-style Playback Speed Control */}
       <div className="flex items-center justify-center mt-6">
-        <div className="bg-gray-800 rounded-full p-1 flex items-center gap-1">
-          <Gauge size={16} className="text-gray-400 ml-2" />
-          <span className="text-gray-400 text-sm mr-2">Speed</span>
-          {speedOptions.map((speed) => (
-            <button
-              key={speed}
-              onClick={() => handleSpeedChange(speed)}
-              className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
-                currentSpeed === speed
-                  ? 'bg-white text-black shadow-md'
-                  : 'text-gray-300 hover:text-white hover:bg-gray-700'
-              }`}
-            >
-              {speed}x
-            </button>
-          ))}
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+            <span className="text-sm font-medium">{currentSpeed}x Speed</span>
+            <ChevronDown size={16} />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="bg-gray-800 border-gray-700">
+            {speedOptions.map((speed) => (
+              <DropdownMenuItem
+                key={speed}
+                onClick={() => handleSpeedChange(speed)}
+                className={`text-white hover:bg-gray-700 cursor-pointer ${
+                  currentSpeed === speed ? 'bg-purple-600 hover:bg-purple-700' : ''
+                }`}
+              >
+                {speed}x
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
