@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Share, Heart, ChevronDown } from "lucide-react";
@@ -18,12 +17,19 @@ import { Button } from '@/components/ui/button';
 const PlayerPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!loading && !user) {
+      setShowAuthDialog(true);
+    }
+  }, [user, loading]);
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -86,7 +92,31 @@ const PlayerPage = () => {
     navigate('/auth');
   };
 
-  if (isLoading) {
+  // Show auth dialog if user is not authenticated
+  if (!loading && !user) {
+    return (
+      <Dialog open={showAuthDialog} onOpenChange={() => navigate('/')}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">Sign In Required</DialogTitle>
+            <DialogDescription className="text-center">
+              Please sign in to start listening to audiobooks and access your library.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 mt-4">
+            <Button onClick={handleAuthDialogAction} className="w-full">
+              Sign In
+            </Button>
+            <Button variant="outline" onClick={() => navigate('/')} className="w-full">
+              Back to Home
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  if (loading || isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950/20 flex items-center justify-center">
         <div className="text-white text-lg">Loading...</div>
@@ -114,10 +144,8 @@ const PlayerPage = () => {
             <ChevronDown size={24} className="text-white" />
           </button>
           <div className="text-center">
-            <p className="text-gray-400 text-sm">PUBLIC STREAMING</p>
-            <p className="text-gray-500 text-xs">
-              {user ? 'Progress Saved' : 'Browse freely'}
-            </p>
+            <p className="text-gray-400 text-sm">AUTHENTICATED STREAMING</p>
+            <p className="text-gray-500 text-xs">Progress Saved</p>
           </div>
           <button 
             className="p-2 hover:bg-gray-800 rounded-full transition-colors"
@@ -152,7 +180,7 @@ const PlayerPage = () => {
             </p>
           </div>
 
-          {/* Public Audio Player */}
+          {/* Secure Audio Player for authenticated users */}
           <SecureAudioPlayer
             bookId={id || '1'}
             audioPath={book.audio_path || 'alchemist.mp3'}
@@ -182,43 +210,8 @@ const PlayerPage = () => {
               />
             </button>
           </div>
-
-          {/* Sign in prompt for additional features - Only for non-authenticated users */}
-          {!user && (
-            <div className="mt-6 text-center">
-              <p className="text-gray-400 text-sm mb-2">
-                Want to save your progress and create playlists?
-              </p>
-              <button
-                onClick={() => navigate('/auth')}
-                className="text-purple-400 hover:text-purple-300 text-sm font-semibold"
-              >
-                Sign In
-              </button>
-            </div>
-          )}
         </div>
       </div>
-
-      {/* Auth Required Dialog */}
-      <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-center">Sign In Required</DialogTitle>
-            <DialogDescription className="text-center">
-              Please sign in to add books to your library and access personalized features.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col gap-3 mt-4">
-            <Button onClick={handleAuthDialogAction} className="w-full">
-              Sign In
-            </Button>
-            <Button variant="outline" onClick={() => setShowAuthDialog(false)} className="w-full">
-              Continue Listening
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };
