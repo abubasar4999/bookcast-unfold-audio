@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Play, Pause, SkipBack, SkipForward, RotateCcw, ChevronDown, RefreshCw } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, RotateCcw, ChevronDown, RefreshCw, Smartphone } from 'lucide-react';
 import { useSecureAudio } from '@/hooks/useSecureAudio';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -34,6 +34,7 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
     isLoading,
     progress,
     retryCount,
+    isMobile,
     togglePlay,
     seekTo,
     skip,
@@ -66,7 +67,7 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
   };
 
   const handleRetry = () => {
-    console.log('Manual retry requested');
+    console.log('Manual retry requested for mobile:', isMobile);
     initializeAudio(true);
   };
 
@@ -77,7 +78,8 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
       <div className="flex flex-col items-center justify-center p-4">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-2"></div>
         <span className="text-white text-center">
-          {retryCount > 0 ? `Retrying... (${retryCount}/3)` : 'Loading audio...'}
+          {isMobile && <Smartphone size={16} className="inline mr-2" />}
+          {retryCount > 0 ? `Retrying... (${retryCount}/3)` : `Loading audio${isMobile ? ' for mobile' : ''}...`}
         </span>
       </div>
     );
@@ -87,10 +89,14 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
     return (
       <div className="text-center p-4">
         <div className="flex items-center justify-center mb-3">
+          {isMobile && <Smartphone size={20} className="text-orange-400 mr-2" />}
           <span className="text-gray-400">Unable to load audio</span>
         </div>
         <p className="text-gray-500 text-sm mb-4">
-          Please check your connection and try again.
+          {isMobile 
+            ? "Mobile network issue detected. Please check your connection and try again."
+            : "Please check your connection and try again."
+          }
         </p>
         <Button 
           onClick={handleRetry}
@@ -99,7 +105,7 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
           className="text-white border-gray-600 hover:bg-gray-700"
         >
           <RefreshCw size={16} className="mr-2" />
-          Retry
+          {isMobile ? 'Retry Mobile Playback' : 'Retry'}
         </Button>
       </div>
     );
@@ -107,11 +113,11 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
 
   return (
     <div className="w-full">
-      {/* Audio element */}
+      {/* Mobile-optimized Audio element */}
       <audio
         ref={audioRef}
         src={audioUrl}
-        preload="metadata"
+        preload={isMobile ? "none" : "metadata"}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={handleEnded}
@@ -119,7 +125,24 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
         playsInline
         controls={false}
         style={{ display: 'none' }}
+        crossOrigin="anonymous"
+        {...(isMobile && {
+          muted: false,
+          autoPlay: false,
+          'webkit-playsinline': 'true',
+          'x5-playsinline': 'true'
+        })}
       />
+
+      {/* Mobile indicator */}
+      {isMobile && (
+        <div className="flex items-center justify-center mb-4">
+          <div className="flex items-center text-orange-400 text-xs bg-orange-900/20 px-3 py-1 rounded-full">
+            <Smartphone size={12} className="mr-1" />
+            <span>Mobile Optimized</span>
+          </div>
+        </div>
+      )}
 
       {/* Progress Bar */}
       <div className="mb-6">
@@ -161,7 +184,9 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
         <div className="relative">
           <button
             onClick={togglePlay}
-            className="w-16 h-16 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors disabled:opacity-50"
+            className={`w-16 h-16 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors disabled:opacity-50 ${
+              isMobile ? 'active:scale-95' : ''
+            }`}
             disabled={!audioUrl || isLoading}
           >
             {isPlaying ? (
@@ -203,6 +228,15 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* Debug info for mobile */}
+      {isMobile && process.env.NODE_ENV === 'development' && (
+        <div className="mt-4 text-xs text-gray-500 text-center">
+          <div>Mobile: {isMobile ? 'Yes' : 'No'}</div>
+          <div>URL: {audioUrl ? 'Generated' : 'None'}</div>
+          <div>Retries: {retryCount}</div>
+        </div>
+      )}
     </div>
   );
 };

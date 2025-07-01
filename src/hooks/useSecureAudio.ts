@@ -25,14 +25,17 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
   const [retryCount, setRetryCount] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Generate audio URL with proper Supabase storage access
+  // Check if we're on mobile
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  // Generate audio URL with mobile-specific handling
   const generateAudioUrl = (path: string): string => {
     if (!path) {
       console.error('Audio path is empty');
       return '';
     }
 
-    console.log('Processing audio path:', path);
+    console.log('Processing audio path for mobile:', path, 'isMobile:', isMobile);
     
     // If it's already a full URL, return as is
     if (path.startsWith('http://') || path.startsWith('https://')) {
@@ -46,8 +49,18 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
         .from('book-audios')
         .getPublicUrl(path);
       
-      console.log('Generated public URL:', data.publicUrl);
-      return data.publicUrl;
+      let finalUrl = data.publicUrl;
+      
+      // Add mobile-specific URL parameters for better compatibility
+      if (isMobile) {
+        const urlObj = new URL(finalUrl);
+        urlObj.searchParams.set('t', Date.now().toString()); // Cache busting
+        urlObj.searchParams.set('mobile', '1'); // Mobile indicator
+        finalUrl = urlObj.toString();
+      }
+      
+      console.log('Generated mobile-optimized URL:', finalUrl);
+      return finalUrl;
     } catch (error) {
       console.error('Error generating public URL:', error);
       return '';
@@ -130,7 +143,23 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
     }
   };
 
-  // Initialize audio
+  // Test if audio URL is accessible
+  const testAudioUrl = async (url: string): Promise<boolean> => {
+    try {
+      const response = await fetch(url, { 
+        method: 'HEAD',
+        mode: 'cors',
+        cache: 'no-cache'
+      });
+      console.log('Audio URL test response:', response.status, response.statusText);
+      return response.ok;
+    } catch (error) {
+      console.error('Audio URL test failed:', error);
+      return false;
+    }
+  };
+
+  // Initialize audio with mobile-specific handling
   const initializeAudio = async (forceRetry: boolean = false) => {
     if (!audioPath) {
       console.error('No audio path provided');
@@ -143,7 +172,7 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
     }
 
     setIsLoading(true);
-    console.log('Initializing audio with path:', audioPath);
+    console.log('Initializing audio with path:', audioPath, 'Mobile:', isMobile);
     
     try {
       const finalAudioUrl = generateAudioUrl(audioPath);
@@ -153,6 +182,19 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
         toast({
           title: "Audio Error",
           description: "Unable to generate audio URL. Please try again.",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Test URL accessibility
+      const isAccessible = await testAudioUrl(finalAudioUrl);
+      if (!isAccessible) {
+        console.error('Audio URL is not accessible');
+        toast({
+          title: "Network Issue",
+          description: "Audio file is not accessible. Please check your connection.",
           variant: "destructive"
         });
         setIsLoading(false);
@@ -214,7 +256,7 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
     }
   };
 
-  // Play/pause functionality
+  // Mobile-optimized play/pause functionality
   const togglePlay = async () => {
     if (!audioRef.current || !audioUrl) {
       console.error('Audio element or URL not ready');
@@ -234,10 +276,24 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
           saveProgress(currentTime);
         }
       } else {
-        console.log('Attempting to play audio:', audioUrl);
-        await audioRef.current.play();
+        console.log('Attempting to play audio on mobile:', isMobile, audioUrl);
+        
+        // Mobile-specific audio preparation
+        if (isMobile) {
+          audioRef.current.load(); // Reload audio element
+          await new Promise(resolve => setTimeout(resolve, 100)); // Small delay
+        }
+        
+        const playPromise = audioRef.current.play();
+        
+        if (playPromise !== undefined) {
+          await playPromise;
+        }
+        
         setIsPlaying(true);
         setRetryCount(0);
+        
+        console.log('Audio playback started successfully');
       }
     } catch (error: any) {
       console.error('Error in audio playback:', error);
@@ -252,24 +308,28 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
       } else if (error.name === 'NotSupportedError') {
         toast({
           title: "Format Not Supported",
-          description: "Audio format not supported or network connectivity issue.",
+          description: "Audio format not supported on this device. Please try a different network or refresh the page.",
           variant: "destructive"
         });
-      } else if (retryCount < 2) {
-        console.log(`Retrying playback (attempt ${retryCount + 1})...`);
-        setRetryCount(prev => prev + 1);
-        setTimeout(() => {
-          initializeAudio(true);
-        }, 1000 * (retryCount + 1));
         
+        // Try to reinitialize on format error
+        if (retryCount < 2) {
+          console.log('Retrying due to format error...');
+          setRetryCount(prev => prev + 1);
+          setTimeout(() => initializeAudio(true), 1000);
+        }
+      } else if (error.name === 'AbortError') {
         toast({
-          title: "Retrying...",
-          description: `Network issue detected. Retrying playback (${retryCount + 1}/3)...`,
+          title: "Network Issue",
+          description: "Playback was interrupted. Please check your connection and try again.",
+          variant: "destructive"
         });
       } else {
         toast({
           title: "Playback Failed",
-          description: "Unable to play audio. Please check your connection and try again.",
+          description: isMobile 
+            ? "Unable to play audio on mobile. Please check your network connection and try again."
+            : "Unable to play audio. Please check your connection and try again.",
           variant: "destructive"
         });
       }
@@ -321,6 +381,7 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
     isLoading,
     progress,
     retryCount,
+    isMobile,
     togglePlay,
     seekTo,
     skip,
