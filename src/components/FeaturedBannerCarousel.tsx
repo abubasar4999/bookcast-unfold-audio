@@ -200,10 +200,9 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
                           handleAddToLibrary(book);
                         }}
                         variant="outline"
-                        className="bg-black/40 text-white border-white/40 hover:bg-black/60 hover:border-white/60 font-semibold px-6 py-4 rounded-full transition-all duration-300 transform hover:scale-105 backdrop-blur-md shadow-xl text-base md:text-lg"
+                        className="bg-black/40 text-white border-white/40 hover:bg-black/60 hover:border-white/60 hover:text-white font-semibold px-6 py-4 rounded-full transition-all duration-300 transform hover:scale-105 backdrop-blur-md shadow-xl text-base md:text-lg"
                       >
-                        <Plus size={18} className="mr-2" />
-                        + Library
+                        Add to Library
                       </Button>
                     </div>
                   </div>
@@ -223,7 +222,7 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
         </button>
       </div>
 
-      {/* Enhanced Custom Styles */}
+      {/* Enhanced Custom Styles - Fixed circular pagination dots */}
       <style dangerouslySetInnerHTML={{
         __html: `
           .featured-carousel .swiper-pagination {
@@ -234,15 +233,17 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
             width: 12px;
             height: 12px;
             background: rgba(255, 255, 255, 0.4);
-            border-radius: 50%;
+            border-radius: 50% !important;
             margin: 0 6px;
             cursor: pointer;
             transition: all 0.3s ease;
             border: 2px solid rgba(255, 255, 255, 0.2);
+            display: inline-block;
+            opacity: 1;
           }
           
           .swiper-pagination-bullet-active-custom {
-            background: white;
+            background: white !important;
             transform: scale(1.3);
             border-color: rgba(255, 255, 255, 0.8);
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
