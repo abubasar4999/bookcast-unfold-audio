@@ -78,12 +78,11 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
     }
   };
 
-  // Save listening progress with proper upsert handling
+  // Save listening progress
   const saveProgress = async (position: number, audioDuration?: number) => {
     if (!user) return;
 
     try {
-      // First try to update existing record
       const { data: existing, error: selectError } = await supabase
         .from('listening_progress')
         .select('id')
@@ -97,7 +96,6 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
       }
 
       if (existing) {
-        // Update existing record
         const { error } = await supabase
           .from('listening_progress')
           .update({
@@ -111,7 +109,6 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
           console.error('Error updating progress:', error);
         }
       } else {
-        // Insert new record
         const { error } = await supabase
           .from('listening_progress')
           .insert({
@@ -128,24 +125,6 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
       }
     } catch (error) {
       console.error('Failed to save progress:', error);
-    }
-  };
-
-  // Test audio URL accessibility
-  const testAudioUrl = async (url: string): Promise<boolean> => {
-    try {
-      const response = await fetch(url, {
-        method: 'HEAD',
-        headers: {
-          'Accept': 'audio/*'
-        }
-      });
-      
-      console.log('Audio URL test response:', response.status);
-      return response.ok;
-    } catch (error) {
-      console.error('Audio URL test failed:', error);
-      return false;
     }
   };
 
@@ -169,13 +148,6 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
       }
       
       console.log('Final audio URL:', finalAudioUrl);
-      
-      // Test URL accessibility
-      const isAccessible = await testAudioUrl(finalAudioUrl);
-      if (!isAccessible) {
-        console.warn('Audio URL may not be accessible');
-      }
-      
       setAudioUrl(finalAudioUrl);
       
       // Load progress only if user is authenticated
@@ -225,7 +197,7 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
     }
   };
 
-  // Play/pause with simplified retry logic
+  // Play/pause functionality
   const togglePlay = async () => {
     if (!audioRef.current || !audioUrl) {
       console.error('Audio element or URL not ready');
@@ -241,8 +213,6 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
         }
       } else {
         console.log('Attempting to play audio from URL:', audioUrl);
-        
-        // Simple play attempt
         await audioRef.current.play();
         setIsPlaying(true);
         console.log('Audio playback started successfully');
@@ -251,7 +221,6 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
       console.error('Error in audio playback:', error);
       setIsPlaying(false);
       
-      // Provide specific error handling
       if (error.name === 'NotAllowedError') {
         console.error('Playback requires user interaction');
       } else if (error.name === 'NotSupportedError') {

@@ -82,16 +82,15 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
 
   return (
     <div className="w-full">
-      {/* Hidden audio element optimized for mobile data streaming */}
+      {/* Audio element optimized for mobile data streaming */}
       <audio
         ref={audioRef}
         src={audioUrl}
-        preload="metadata"
+        preload="none"
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={handleEnded}
         className="hidden"
-        crossOrigin="anonymous"
         playsInline
         controls={false}
         style={{ display: 'none' }}
@@ -155,7 +154,7 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
         </button>
       </div>
 
-      {/* Dropdown-style Playback Speed Control */}
+      {/* Playback Speed Control */}
       <div className="flex items-center justify-center mt-6">
         <DropdownMenu>
           <DropdownMenuTrigger className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
