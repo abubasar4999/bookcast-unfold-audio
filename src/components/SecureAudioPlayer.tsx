@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Play, Pause, SkipBack, SkipForward, RotateCcw, ChevronDown, Wifi, WifiOff, RefreshCw } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, RotateCcw, ChevronDown, RefreshCw } from 'lucide-react';
 import { useSecureAudio } from '@/hooks/useSecureAudio';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -24,7 +24,6 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
 }) => {
   const { user } = useAuth();
   const [currentSpeed, setCurrentSpeed] = React.useState(1);
-  const [networkStatus, setNetworkStatus] = React.useState<'online' | 'offline'>('online');
   
   const {
     audioRef,
@@ -47,22 +46,6 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
   React.useEffect(() => {
     onPlayStateChange?.(isPlaying);
   }, [isPlaying, onPlayStateChange]);
-
-  // Monitor network status
-  React.useEffect(() => {
-    const updateNetworkStatus = () => {
-      setNetworkStatus(navigator.onLine ? 'online' : 'offline');
-    };
-
-    window.addEventListener('online', updateNetworkStatus);
-    window.addEventListener('offline', updateNetworkStatus);
-    updateNetworkStatus();
-
-    return () => {
-      window.removeEventListener('online', updateNetworkStatus);
-      window.removeEventListener('offline', updateNetworkStatus);
-    };
-  }, []);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -96,11 +79,6 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
         <span className="text-white text-center">
           {retryCount > 0 ? `Retrying... (${retryCount}/3)` : 'Loading audio...'}
         </span>
-        {retryCount > 0 && (
-          <span className="text-gray-400 text-sm mt-1">
-            Network optimization in progress
-          </span>
-        )}
       </div>
     );
   }
@@ -109,11 +87,10 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
     return (
       <div className="text-center p-4">
         <div className="flex items-center justify-center mb-3">
-          <WifiOff size={24} className="text-red-400 mr-2" />
           <span className="text-gray-400">Unable to load audio</span>
         </div>
         <p className="text-gray-500 text-sm mb-4">
-          Network connectivity issue detected. This may be due to carrier-specific restrictions.
+          Please check your connection and try again.
         </p>
         <Button 
           onClick={handleRetry}
@@ -122,7 +99,7 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
           className="text-white border-gray-600 hover:bg-gray-700"
         >
           <RefreshCw size={16} className="mr-2" />
-          Retry Connection
+          Retry
         </Button>
       </div>
     );
@@ -130,26 +107,11 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
 
   return (
     <div className="w-full">
-      {/* Network Status Indicator */}
-      <div className="flex items-center justify-center mb-2">
-        <div className="flex items-center text-xs text-gray-400">
-          {networkStatus === 'online' ? (
-            <Wifi size={12} className="mr-1 text-green-400" />
-          ) : (
-            <WifiOff size={12} className="mr-1 text-red-400" />
-          )}
-          <span>{networkStatus === 'online' ? 'Connected' : 'Offline'}</span>
-          {retryCount > 0 && (
-            <span className="ml-2 text-yellow-400">• Optimizing for mobile data</span>
-          )}
-        </div>
-      </div>
-
-      {/* Audio element optimized for all network types */}
+      {/* Audio element */}
       <audio
         ref={audioRef}
         src={audioUrl}
-        preload="none"
+        preload="metadata"
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={handleEnded}
@@ -157,17 +119,6 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
         playsInline
         controls={false}
         style={{ display: 'none' }}
-        // Mobile data optimizations
-        crossOrigin={undefined}
-        onError={(e) => {
-          console.error('Audio element error:', e);
-        }}
-        onStalled={() => {
-          console.warn('Audio stalled - possible network issue');
-        }}
-        onSuspend={() => {
-          console.log('Audio suspended - bandwidth optimization');
-        }}
       />
 
       {/* Progress Bar */}
@@ -219,13 +170,6 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
               <Play size={32} className="text-black ml-1" />
             )}
           </button>
-          
-          {/* Retry indicator */}
-          {retryCount > 0 && (
-            <div className="absolute -top-1 -right-1 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center">
-              <RefreshCw size={12} className="text-black animate-spin" />
-            </div>
-          )}
         </div>
 
         <button 
@@ -259,15 +203,6 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
-      {/* Network troubleshooting hint */}
-      {retryCount > 1 && (
-        <div className="mt-4 p-3 bg-gray-800 rounded-lg border border-gray-700">
-          <p className="text-yellow-400 text-sm text-center">
-            📶 Having network issues? Try switching between Wi-Fi and mobile data, or check if your carrier supports audio streaming.
-          </p>
-        </div>
-      )}
     </div>
   );
 };
