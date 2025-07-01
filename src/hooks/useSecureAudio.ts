@@ -23,7 +23,7 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
   const [progress, setProgress] = useState<ListeningProgress | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Generate public URL with mobile-friendly headers
+  // Generate public URL optimized for mobile data streaming
   const generateAudioUrl = (path: string): string => {
     if (!path) {
       console.error('Audio path is empty');
@@ -35,19 +35,32 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
     // Check if the path is already a full URL
     if (path.startsWith('http://') || path.startsWith('https://')) {
       console.log('Audio path is already a full URL:', path);
-      return path;
+      // Add mobile-friendly parameters to existing URLs
+      const url = new URL(path);
+      url.searchParams.set('cache-control', 'public, max-age=3600');
+      url.searchParams.set('accept-ranges', 'bytes');
+      return url.toString();
     }
     
     try {
-      // Generate public URL with mobile-optimized parameters
+      // Generate public URL optimized for mobile streaming
       const { data } = supabase.storage
         .from('book-audios')
         .getPublicUrl(path, {
-          download: false
+          download: false,
+          transform: {
+            quality: 80 // Optimize for mobile data usage
+          }
         });
       
       console.log('Generated public URL from path:', data.publicUrl);
-      return data.publicUrl;
+      
+      // Add mobile-optimized parameters
+      const url = new URL(data.publicUrl);
+      url.searchParams.set('cache-control', 'public, max-age=3600');
+      url.searchParams.set('accept-ranges', 'bytes');
+      
+      return url.toString();
     } catch (error) {
       console.error('Error generating public URL:', error);
       return '';
@@ -103,6 +116,26 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
     }
   };
 
+  // Test audio URL accessibility for mobile data
+  const testAudioUrl = async (url: string): Promise<boolean> => {
+    try {
+      const response = await fetch(url, {
+        method: 'HEAD',
+        headers: {
+          'Accept': 'audio/*',
+          'Cache-Control': 'no-cache',
+          'Range': 'bytes=0-1024' // Test partial content support
+        }
+      });
+      
+      console.log('Audio URL test response:', response.status, response.headers.get('accept-ranges'));
+      return response.ok && response.status < 400;
+    } catch (error) {
+      console.error('Audio URL test failed:', error);
+      return false;
+    }
+  };
+
   // Initialize audio with mobile-optimized settings
   const initializeAudio = async () => {
     if (!audioPath) {
@@ -123,6 +156,13 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
       }
       
       console.log('Final audio URL:', finalAudioUrl);
+      
+      // Test URL accessibility before setting it
+      const isAccessible = await testAudioUrl(finalAudioUrl);
+      if (!isAccessible) {
+        console.warn('Audio URL may not be accessible on mobile data');
+      }
+      
       setAudioUrl(finalAudioUrl);
       
       // Load progress only if user is authenticated
@@ -149,12 +189,15 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
     }
   };
 
-  // Handle audio metadata loaded
+  // Handle audio metadata loaded with mobile-specific settings
   const handleLoadedMetadata = () => {
     if (audioRef.current) {
       const audioDuration = audioRef.current.duration;
       setDuration(audioDuration);
       console.log('Audio duration loaded:', audioDuration);
+      
+      // Apply mobile-optimized settings
+      audioRef.current.preload = 'metadata';
       
       // Resume from saved position (only for authenticated users)
       if (user && progress && progress.current_position > 0) {
@@ -172,7 +215,7 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
     }
   };
 
-  // Play/pause toggle with mobile-optimized retry logic
+  // Enhanced play/pause with mobile data retry logic
   const togglePlay = async () => {
     if (!audioRef.current || !audioUrl) {
       console.error('Audio element or URL not ready');
@@ -189,33 +232,70 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
       } else {
         console.log('Attempting to play audio from URL:', audioUrl);
         
-        // Mobile-friendly play attempt with retry
+        // Mobile-friendly play attempt with enhanced retry logic
         let playAttempts = 0;
-        const maxAttempts = 3;
+        const maxAttempts = 5;
         
         while (playAttempts < maxAttempts) {
           try {
+            // Pre-flight check for mobile data
+            if (playAttempts > 0) {
+              console.log(`Retry attempt ${playAttempts} for mobile data playback`);
+              
+              // Reload audio source on retry for mobile data issues
+              const currentSrc = audioRef.current.src;
+              audioRef.current.src = '';
+              audioRef.current.load();
+              audioRef.current.src = currentSrc;
+              
+              // Wait for audio to be ready
+              await new Promise((resolve) => {
+                const checkReady = () => {
+                  if (audioRef.current && audioRef.current.readyState >= 2) {
+                    resolve(true);
+                  } else {
+                    setTimeout(checkReady, 100);
+                  }
+                };
+                checkReady();
+              });
+            }
+            
             await audioRef.current.play();
             setIsPlaying(true);
+            console.log('Audio playback started successfully');
             break;
-          } catch (playError) {
+          } catch (playError: any) {
             playAttempts++;
-            console.warn(`Play attempt ${playAttempts} failed:`, playError);
+            console.warn(`Play attempt ${playAttempts} failed:`, playError.message);
             
             if (playAttempts >= maxAttempts) {
+              // Final attempt failed
+              if (playError.name === 'NotAllowedError') {
+                console.error('Audio playback blocked - user interaction required');
+              } else if (playError.name === 'NotSupportedError') {
+                console.error('Audio format not supported or network issue');
+              } else {
+                console.error('Audio playback failed after all retries:', playError);
+              }
               throw playError;
             }
             
-            // Brief delay before retry
-            await new Promise(resolve => setTimeout(resolve, 500));
+            // Progressive delay for mobile data issues
+            const delay = Math.min(1000 * Math.pow(2, playAttempts - 1), 5000);
+            await new Promise(resolve => setTimeout(resolve, delay));
           }
         }
       }
-    } catch (error) {
-      console.error('Error playing audio:', error);
-      // Provide user feedback for mobile data issues
+    } catch (error: any) {
+      console.error('Error in audio playback:', error);
+      setIsPlaying(false);
+      
+      // Provide specific error handling for mobile data issues
       if (error.name === 'NotAllowedError') {
-        console.error('Audio playback blocked - user interaction required');
+        console.error('Playback requires user interaction');
+      } else if (error.name === 'NotSupportedError') {
+        console.error('Audio format not supported or network connectivity issue');
       }
     }
   };

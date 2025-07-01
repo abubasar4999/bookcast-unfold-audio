@@ -75,14 +75,14 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
   if (!audioUrl) {
     return (
       <div className="text-center text-gray-400 p-4">
-        Unable to load audio. Please try again.
+        Unable to load audio. Please check your connection and try again.
       </div>
     );
   }
 
   return (
     <div className="w-full">
-      {/* Hidden audio element with mobile data optimizations */}
+      {/* Hidden audio element optimized for mobile data streaming */}
       <audio
         ref={audioRef}
         src={audioUrl}
@@ -93,6 +93,8 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
         className="hidden"
         crossOrigin="anonymous"
         playsInline
+        controls={false}
+        style={{ display: 'none' }}
       />
 
       {/* Progress Bar */}
