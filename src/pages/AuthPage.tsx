@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, User, Phone, Mail } from 'lucide-react';
+import { ArrowLeft, User, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,7 +18,6 @@ const AuthPage = () => {
     email: '',
     password: '',
     name: '',
-    phone: ''
   });
 
   const from = location.state?.from?.pathname || '/genre-selection';
@@ -37,7 +36,7 @@ const AuthPage = () => {
           navigate('/');
         }
       } else {
-        const { error } = await signUp(formData.email, formData.password, formData.name, formData.phone);
+        const { error } = await signUp(formData.email, formData.password, formData.name);
         if (error) {
           toast.error(error.message);
         } else {
@@ -67,33 +66,6 @@ const AuthPage = () => {
       }
     } catch (error) {
       toast.error('Google authentication failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePhoneAuth = async () => {
-    if (!formData.phone) {
-      toast.error('Please enter your phone number');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const { error } = await supabase.auth.signInWithOtp({
-        phone: formData.phone,
-        options: {
-          channel: 'sms'
-        }
-      });
-      
-      if (error) {
-        toast.error('Phone authentication failed: ' + error.message);
-      } else {
-        toast.success('OTP sent to your phone number');
-      }
-    } catch (error) {
-      toast.error('Phone authentication failed');
     } finally {
       setLoading(false);
     }
@@ -143,24 +115,6 @@ const AuthPage = () => {
                 </svg>
                 Continue with Google
               </Button>
-
-              <div className="flex space-x-2">
-                <Input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  className="bg-gray-800 border-gray-700 text-white rounded-xl flex-1"
-                  placeholder="Enter phone number"
-                />
-                <Button
-                  onClick={handlePhoneAuth}
-                  disabled={loading || !formData.phone}
-                  variant="outline"
-                  className="border-gray-600 bg-gray-800 text-white hover:bg-gray-700 font-semibold px-6 rounded-xl"
-                >
-                  <Phone size={20} />
-                </Button>
-              </div>
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
