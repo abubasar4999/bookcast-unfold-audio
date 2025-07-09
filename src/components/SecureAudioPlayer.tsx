@@ -90,7 +90,7 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
     return (
       <div className="text-center p-4">
         <div className="flex items-center justify-center mb-3">
-          <AlertTriangle size={20) className="text-red-400 mr-2" />
+          <AlertTriangle size={20} className="text-red-400 mr-2" />
           <span className="text-gray-400">Audio player unavailable</span>
         </div>
         <p className="text-gray-500 text-sm mb-4">
