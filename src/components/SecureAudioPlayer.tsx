@@ -80,7 +80,7 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-2"></div>
         <span className="text-white text-center">
           {isMobile && <Smartphone size={16} className="inline mr-2" />}
-          Loading audio...
+          Loading audio player...
         </span>
       </div>
     );
@@ -90,11 +90,11 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
     return (
       <div className="text-center p-4">
         <div className="flex items-center justify-center mb-3">
-          <AlertTriangle size={20} className="text-red-400 mr-2" />
-          <span className="text-gray-400">Unable to load audio</span>
+          <AlertTriangle size={20) className="text-red-400 mr-2" />
+          <span className="text-gray-400">Audio player unavailable</span>
         </div>
         <p className="text-gray-500 text-sm mb-4">
-          Please check your connection and try again.
+          Unable to load the audio file. Please check your internet connection.
         </p>
         <Button 
           onClick={handleRetry}
@@ -103,7 +103,7 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
           className="text-white border-gray-600 hover:bg-gray-700"
         >
           <RefreshCw size={16} className="mr-2" />
-          Retry
+          Try Again
         </Button>
       </div>
     );

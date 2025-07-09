@@ -55,8 +55,8 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
         setUsingDemoAudio(true);
         
         toast({
-          title: "Using Demo Audio",
-          description: "The requested audio file is not available. Playing demo audio instead.",
+          title: "Audio File Not Available",
+          description: "The audio file could not be loaded. Playing demo audio instead.",
           variant: "default"
         });
       } else {
@@ -83,9 +83,9 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
       setUsingDemoAudio(true);
       
       toast({
-        title: "Using Demo Audio",
+        title: "Audio Loading Error",
         description: "Unable to load the requested audio. Playing demo audio instead.",
-        variant: "default"
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
@@ -130,7 +130,7 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
       console.error('Audio element or URL not ready');
       toast({
         title: "Player Not Ready",
-        description: "Audio player is not ready. Please wait or refresh.",
+        description: "Audio player is not ready. Please wait or refresh the page.",
         variant: "destructive"
       });
       return;
@@ -149,7 +149,18 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
         // Mobile-specific preparation
         if (isMobile) {
           audioRef.current.load();
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
+        
+        // Ensure audio is loaded
+        if (audioRef.current.readyState < 3) {
+          await new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => reject(new Error('Audio load timeout')), 10000);
+            audioRef.current!.addEventListener('canplay', () => {
+              clearTimeout(timeout);
+              resolve(true);
+            }, { once: true });
+          });
         }
         
         const playPromise = audioRef.current.play();
@@ -180,7 +191,7 @@ export const useSecureAudio = ({ bookId, audioPath }: UseSecureAudioProps) => {
       } else {
         toast({
           title: "Playback Failed",
-          description: "Unable to play audio. Please check your connection.",
+          description: "Unable to play audio. Please check your connection and try again.",
           variant: "destructive"
         });
       }
