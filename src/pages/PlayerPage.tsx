@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Share, Heart, ChevronDown } from "lucide-react";
@@ -74,7 +73,7 @@ const PlayerPage = () => {
     };
 
     fetchBook();
-  }, [id, startPlaybook]);
+  }, [id, startPlayback]);
 
   // Hide mini player when on player page
   useEffect(() => {
