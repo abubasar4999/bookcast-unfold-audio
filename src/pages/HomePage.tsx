@@ -7,15 +7,21 @@ import GenreCarousel from '@/components/GenreCarousel';
 const HomePage = () => {
   const { user } = useAuth();
 
-  // Extract user's first name from full_name or email
-  const getUserFirstName = () => {
+  // Extract user's first name from full_name or email, or show default greeting
+  const getUserGreeting = () => {
+    if (!user) {
+      return 'Hi there 👋';
+    }
+    
     if (user?.user_metadata?.full_name) {
-      return user.user_metadata.full_name.split(' ')[0];
+      const firstName = user.user_metadata.full_name.split(' ')[0];
+      return `For ${firstName}`;
     }
     if (user?.email) {
-      return user.email.split('@')[0];
+      const firstName = user.email.split('@')[0];
+      return `For ${firstName}`;
     }
-    return 'there';
+    return 'For you';
   };
 
   const genres = [
@@ -37,7 +43,7 @@ const HomePage = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-purple-900/20 via-transparent to-blue-900/20 rounded-xl" />
         <div className="relative">
           <h1 className="text-2xl md:text-4xl font-bold text-white bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent">
-            For {getUserFirstName()}
+            {getUserGreeting()}
           </h1>
           <p className="text-gray-400 mt-1 text-sm md:text-base">What would you like to listen to today?</p>
         </div>
@@ -54,8 +60,8 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Continue Listening Section */}
-      <ContinueListeningSection />
+      {/* Continue Listening Section - only show if user is logged in */}
+      {user && <ContinueListeningSection />}
 
       {/* Genre-Based Carousels with alternating gradient backgrounds */}
       {genres.map((genreData, index) => (

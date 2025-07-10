@@ -88,8 +88,8 @@ const GenreSelectionPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-2xl text-center">
+    <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center px-4 pb-24 md:pb-8">
+      <div className="w-full max-w-2xl text-center flex-1 flex flex-col justify-center">
         <h1 className="text-3xl font-bold text-white mb-2">Select your favorite genres</h1>
         <p className="text-gray-400 mb-8">Choose at least 2 genres to get personalized recommendations</p>
         
@@ -109,15 +109,15 @@ const GenreSelectionPage = () => {
           ))}
         </div>
 
-        <div className="flex flex-col items-center space-y-4">
+        <div className="flex flex-col items-center space-y-4 mb-8">
           <p className="text-gray-400 text-sm">
-            {selectedGenres.length}/2 genres selected
+            {selectedGenres.length} genres selected
           </p>
           
           <Button
             onClick={handleContinue}
             disabled={selectedGenres.length < 2 || loading}
-            className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-8 rounded-full min-w-[200px]"
+            className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-8 rounded-full min-w-[200px] z-50"
           >
             {loading ? 'Saving...' : 'Continue'}
           </Button>
