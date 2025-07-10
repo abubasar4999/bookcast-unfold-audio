@@ -96,4 +96,47 @@
       margin-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
     }
   }
+
+  /* Custom range slider styling for audio player */
+  .slider::-webkit-slider-thumb {
+    appearance: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #a855f7, #ec4899);
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(168, 85, 247, 0.4);
+    transition: all 0.2s ease;
+  }
+
+  .slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.6);
+  }
+
+  .slider::-moz-range-thumb {
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #a855f7, #ec4899);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 8px rgba(168, 85, 247, 0.4);
+  }
+
+  /* Viewport height optimization for mobile */
+  @supports (-webkit-touch-callout: none) {
+    .min-h-screen {
+      min-height: -webkit-fill-available;
+    }
+  }
+
+  /* Ensure proper z-index layering */
+  .mini-player-z {
+    z-index: 45;
+  }
+
+  .nav-z {
+    z-index: 50;
+  }
 }

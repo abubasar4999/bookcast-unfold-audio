@@ -1,7 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Share, Heart, ChevronDown } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
+import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Book } from '@/hooks/useBooks';
 import SecureAudioPlayer from '@/components/SecureAudioPlayer';
@@ -18,6 +20,7 @@ const PlayerPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const { startPlayback, setShowMiniPlayer, updateProgress } = useAudioPlayer();
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
@@ -48,9 +51,19 @@ const PlayerPage = () => {
         }
 
         if (data) {
-          setBook({
+          const bookData = {
             ...data,
             cover: data.cover_url,
+          };
+          setBook(bookData);
+          
+          // Initialize global audio state
+          startPlayback({
+            id: data.id,
+            title: data.title,
+            author: data.author,
+            cover: data.cover_url || '',
+            audioPath: data.audio_path || '',
           });
         }
       } catch (error) {
@@ -61,7 +74,18 @@ const PlayerPage = () => {
     };
 
     fetchBook();
-  }, [id]);
+  }, [id, startPlaybook]);
+
+  // Hide mini player when on player page
+  useEffect(() => {
+    setShowMiniPlayer(false);
+    return () => {
+      // Show mini player when leaving if audio is playing
+      if (isPlaying) {
+        setShowMiniPlayer(true);
+      }
+    };
+  }, [setShowMiniPlayer, isPlaying]);
 
   const handleShare = () => {
     if (!book) return;
@@ -90,6 +114,13 @@ const PlayerPage = () => {
   const handleAuthDialogAction = () => {
     setShowAuthDialog(false);
     navigate('/auth');
+  };
+
+  const handleBackClick = () => {
+    if (isPlaying) {
+      setShowMiniPlayer(true);
+    }
+    navigate(-1);
   };
 
   // Show auth dialog if user is not authenticated
@@ -133,31 +164,32 @@ const PlayerPage = () => {
   }
 
   return (
-    <>
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950/20 flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 pt-12">
-          <button
-            onClick={() => navigate(-1)}
-            className="p-2 hover:bg-gray-800 rounded-full transition-colors"
-          >
-            <ChevronDown size={24} className="text-white" />
-          </button>
-          <div className="text-center">
-            <p className="text-gray-400 text-sm">AUTHENTICATED STREAMING</p>
-            <p className="text-gray-500 text-xs">Progress Saved</p>
-          </div>
-          <button 
-            className="p-2 hover:bg-gray-800 rounded-full transition-colors"
-            onClick={handleShare}
-          >
-            <Share size={24} className="text-white" />
-          </button>
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950/20 flex flex-col overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 pt-12 flex-shrink-0">
+        <button
+          onClick={handleBackClick}
+          className="p-2 hover:bg-gray-800 rounded-full transition-colors"
+        >
+          <ChevronDown size={24} className="text-white" />
+        </button>
+        <div className="text-center">
+          <p className="text-gray-400 text-sm">AUTHENTICATED STREAMING</p>
+          <p className="text-gray-500 text-xs">Progress Saved</p>
         </div>
+        <button 
+          className="p-2 hover:bg-gray-800 rounded-full transition-colors"
+          onClick={handleShare}
+        >
+          <Share size={24} className="text-white" />
+        </button>
+      </div>
 
-        {/* Album Art */}
-        <div className="flex-1 flex items-center justify-center px-8 py-8">
-          <div className="w-full max-w-sm">
+      {/* Main Content - Optimized for viewport */}
+      <div className="flex-1 flex flex-col px-6 min-h-0">
+        {/* Album Art - Responsive sizing */}
+        <div className="flex-1 flex items-center justify-center py-4 min-h-0">
+          <div className="w-full max-w-xs md:max-w-sm lg:max-w-md">
             <img
               src={book.cover || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop'}
               alt={book.title}
@@ -166,11 +198,11 @@ const PlayerPage = () => {
           </div>
         </div>
 
-        {/* Player Controls */}
-        <div className="px-6 pb-8">
+        {/* Player Controls Section */}
+        <div className="flex-shrink-0 pb-8 mobile-safe-bottom">
           {/* Track Info */}
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-white mb-2 leading-tight">
+          <div className="text-center mb-6">
+            <h1 className="text-xl md:text-2xl font-bold text-white mb-2 leading-tight">
               {book.title}
             </h1>
             <p className="text-gray-400 mb-1">{book.author}</p>
@@ -180,7 +212,7 @@ const PlayerPage = () => {
             </p>
           </div>
 
-          {/* Secure Audio Player for authenticated users */}
+          {/* Secure Audio Player */}
           <SecureAudioPlayer
             bookId={id || '1'}
             audioPath={book.audio_path || 'alchemist.mp3'}
@@ -188,7 +220,7 @@ const PlayerPage = () => {
           />
 
           {/* Bottom Actions */}
-          <div className="flex items-center justify-between mt-8">
+          <div className="flex items-center justify-between mt-6">
             <button 
               className="p-2 hover:bg-gray-800 rounded-full transition-colors"
               onClick={handleShare}
@@ -212,7 +244,7 @@ const PlayerPage = () => {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

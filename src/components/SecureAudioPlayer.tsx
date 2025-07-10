@@ -156,7 +156,7 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
           onChange={handleSeek}
           className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
           style={{
-            background: `linear-gradient(to right, #ffffff 0%, #ffffff ${(currentTime / duration) * 100}%, #374151 ${(currentTime / duration) * 100}%, #374151 100%)`
+            background: `linear-gradient(to right, #a855f7 0%, #a855f7 ${(currentTime / duration) * 100}%, #374151 ${(currentTime / duration) * 100}%, #374151 100%)`
           }}
         />
         <div className="flex justify-between text-gray-400 text-sm mt-2">
@@ -174,44 +174,61 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
       </div>
 
       {/* Control Buttons */}
-      <div className="flex items-center justify-center gap-8">
+      <div className="flex items-center justify-center gap-4 md:gap-6">
+        {/* Skip Backward 10s */}
         <button 
-          onClick={() => skip(-15)}
-          className="p-3 hover:bg-gray-800 rounded-full transition-colors"
+          onClick={() => skip(-10)}
+          className="relative w-12 h-12 md:w-14 md:h-14 bg-gray-800/60 hover:bg-gray-700/80 rounded-full flex items-center justify-center transition-all duration-200 border border-gray-600/30 hover:border-purple-500/50 group"
           disabled={!audioUrl}
         >
-          <SkipBack size={28} className="text-white" />
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <svg viewBox="0 0 24 24" className="w-6 h-6 md:w-7 md:h-7 text-white relative z-10">
+              <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M8 12l4-4v3h4v2h-4v3l-4-4z" fill="currentColor"/>
+              <text x="12" y="16" textAnchor="middle" className="text-xs fill-current font-bold">10</text>
+            </svg>
+          </div>
         </button>
 
+        {/* Main Play/Pause Button */}
         <div className="relative">
           <button
             onClick={togglePlay}
-            className={`w-16 h-16 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors disabled:opacity-50 ${
-              isMobile ? 'active:scale-95' : ''
+            className={`w-16 h-16 md:w-20 md:h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-purple-500/25 disabled:opacity-50 ${
+              isMobile ? 'active:scale-95' : 'hover:scale-105'
             }`}
             disabled={!audioUrl || isLoading}
           >
             {isPlaying ? (
-              <Pause size={32} className="text-black" />
+              <Pause size={32} className="text-white ml-0" />
             ) : (
-              <Play size={32} className="text-black ml-1" />
+              <Play size={32} className="text-white ml-1" />
             )}
           </button>
         </div>
 
+        {/* Skip Forward 10s */}
         <button 
-          onClick={() => skip(15)}
-          className="p-3 hover:bg-gray-800 rounded-full transition-colors"
+          onClick={() => skip(10)}
+          className="relative w-12 h-12 md:w-14 md:h-14 bg-gray-800/60 hover:bg-gray-700/80 rounded-full flex items-center justify-center transition-all duration-200 border border-gray-600/30 hover:border-purple-500/50 group"
           disabled={!audioUrl}
         >
-          <SkipForward size={28} className="text-white" />
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <svg viewBox="0 0 24 24" className="w-6 h-6 md:w-7 md:h-7 text-white relative z-10">
+              <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M16 12l-4-4v3H8v2h4v3l4-4z" fill="currentColor"/>
+              <text x="12" y="16" textAnchor="middle" className="text-xs fill-current font-bold">10</text>
+            </svg>
+          </div>
         </button>
       </div>
 
       {/* Playback Speed Control */}
       <div className="flex items-center justify-center mt-6">
         <DropdownMenu>
-          <DropdownMenuTrigger className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+          <DropdownMenuTrigger className="bg-gray-800/60 hover:bg-gray-700/80 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors border border-gray-600/30 hover:border-purple-500/50">
             <span className="text-sm font-medium">{currentSpeed}x Speed</span>
             <ChevronDown size={16} />
           </DropdownMenuTrigger>
