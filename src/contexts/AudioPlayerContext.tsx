@@ -47,18 +47,82 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  const startPlayback = useCallback((book: AudioPlayerState['currentBook']) => {
+  const generateAudioUrl = (audioPath: string): string => {
+    if (!audioPath) {
+      console.error('Audio path is empty');
+      return '';
+    }
+
+    console.log('Generating audio URL for path:', audioPath);
+    
+    // If it's already a full URL, return as is
+    if (audioPath.startsWith('http://') || audioPath.startsWith('https://')) {
+      console.log('Audio path is already a full URL:', audioPath);
+      return audioPath;
+    }
+    
+    // Generate public URL from path
+    const baseUrl = 'https://xtqzxtqmqxqorpamsllm.supabase.co/storage/v1/object/public/book-audios/';
+    const finalUrl = baseUrl + audioPath;
+    
+    console.log('Generated audio URL:', finalUrl);
+    return finalUrl;
+  };
+
+  const startPlayback = useCallback(async (book: AudioPlayerState['currentBook']) => {
     console.log('Starting playback for book:', book);
+    
+    if (!book || !audioRef.current) {
+      console.error('No book or audio ref available');
+      return;
+    }
+
     setState(prev => ({
       ...prev,
       currentBook: book,
       isPlaying: false, // Will be set to true when audio actually starts playing
     }));
 
-    // Set audio source
-    if (audioRef.current && book) {
-      audioRef.current.src = `/audio/${book.audioPath}`;
+    try {
+      // Generate and set audio source
+      const audioUrl = generateAudioUrl(book.audioPath);
+      if (!audioUrl) {
+        console.error('Failed to generate audio URL');
+        return;
+      }
+
+      console.log('Setting audio source to:', audioUrl);
+      audioRef.current.src = audioUrl;
       audioRef.current.load();
+
+      // Wait for audio to be ready
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Audio load timeout'));
+        }, 10000);
+
+        const handleCanPlay = () => {
+          clearTimeout(timeout);
+          audioRef.current?.removeEventListener('canplay', handleCanPlay);
+          audioRef.current?.removeEventListener('error', handleError);
+          resolve();
+        };
+
+        const handleError = (e: Event) => {
+          clearTimeout(timeout);
+          audioRef.current?.removeEventListener('canplay', handleCanPlay);
+          audioRef.current?.removeEventListener('error', handleError);
+          console.error('Audio load error:', e);
+          reject(new Error('Audio load failed'));
+        };
+
+        audioRef.current?.addEventListener('canplay', handleCanPlay);
+        audioRef.current?.addEventListener('error', handleError);
+      });
+
+      console.log('Audio loaded successfully');
+    } catch (error) {
+      console.error('Error in startPlayback:', error);
     }
   }, []);
 
@@ -91,11 +155,24 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setState(prev => ({ ...prev, isPlaying: false }));
       } else {
         console.log('Playing audio');
+        
+        // Ensure audio source is set
+        if (!audioRef.current.src || audioRef.current.src === window.location.href) {
+          const audioUrl = generateAudioUrl(state.currentBook.audioPath);
+          if (audioUrl) {
+            audioRef.current.src = audioUrl;
+            audioRef.current.load();
+            // Wait a bit for the audio to load
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+        }
+
         await audioRef.current.play();
         setState(prev => ({ ...prev, isPlaying: true }));
       }
     } catch (error) {
       console.error('Error toggling playback:', error);
+      setState(prev => ({ ...prev, isPlaying: false }));
     }
   }, [state.isPlaying, state.currentBook]);
 
@@ -135,6 +212,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     if (audioRef.current) {
       const duration = audioRef.current.duration;
       setState(prev => ({ ...prev, duration }));
+      console.log('Audio metadata loaded, duration:', duration);
     }
   }, []);
 
@@ -143,10 +221,17 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   }, []);
 
   const handlePlay = useCallback(() => {
+    console.log('Audio started playing');
     setState(prev => ({ ...prev, isPlaying: true }));
   }, []);
 
   const handlePause = useCallback(() => {
+    console.log('Audio paused');
+    setState(prev => ({ ...prev, isPlaying: false }));
+  }, []);
+
+  const handleError = useCallback((e: Event) => {
+    console.error('Audio error:', e);
     setState(prev => ({ ...prev, isPlaying: false }));
   }, []);
 
@@ -160,6 +245,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('pause', handlePause);
+    audio.addEventListener('error', handleError);
 
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
@@ -167,8 +253,9 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('play', handlePlay);
       audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('error', handleError);
     };
-  }, [handleTimeUpdate, handleLoadedMetadata, handleEnded, handlePlay, handlePause]);
+  }, [handleTimeUpdate, handleLoadedMetadata, handleEnded, handlePlay, handlePause, handleError]);
 
   return (
     <AudioPlayerContext.Provider

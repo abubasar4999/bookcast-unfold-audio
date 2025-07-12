@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Play, Pause, ChevronDown, RefreshCw, Smartphone, AlertTriangle } from 'lucide-react';
-import { useSecureAudio } from '@/hooks/useSecureAudio';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 import {
@@ -27,11 +26,11 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
   const { state: globalAudioState, togglePlayback, seekTo: globalSeekTo, audioRef } = useAudioPlayer();
   const [currentSpeed, setCurrentSpeed] = React.useState(1);
   
-  // Use global audio state instead of local hook
+  // Use global audio state
   const isPlaying = globalAudioState.isPlaying;
   const currentTime = globalAudioState.currentTime;
   const duration = globalAudioState.duration;
-  const isLoading = false; // Since we're using global state
+  const isLoading = !globalAudioState.currentBook;
 
   // Sync with onPlayStateChange callback
   React.useEffect(() => {
@@ -63,7 +62,7 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
 
   const speedOptions = [0.75, 1, 1.25, 1.5, 2];
 
-  // Custom Skip Button Component with improved design
+  // Custom Skip Button Component
   const SkipButton = ({ direction, onClick, disabled }: { 
     direction: 'backward' | 'forward'; 
     onClick: () => void;
