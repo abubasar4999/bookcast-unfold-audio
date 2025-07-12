@@ -44,6 +44,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   });
 
   const startPlayback = useCallback((book: AudioPlayerState['currentBook']) => {
+    console.log('Starting playback for book:', book);
     setState(prev => ({
       ...prev,
       currentBook: book,
@@ -52,6 +53,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   }, []);
 
   const stopPlayback = useCallback(() => {
+    console.log('Stopping playback');
     setState(prev => ({
       ...prev,
       isPlaying: false,
@@ -63,11 +65,16 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   }, []);
 
   const togglePlayback = useCallback(() => {
-    setState(prev => ({
-      ...prev,
-      isPlaying: !prev.isPlaying,
-    }));
-  }, []);
+    console.log('Toggling playback, current state:', state.isPlaying);
+    setState(prev => {
+      const newIsPlaying = !prev.isPlaying;
+      console.log('New playing state:', newIsPlaying);
+      return {
+        ...prev,
+        isPlaying: newIsPlaying,
+      };
+    });
+  }, [state.isPlaying]);
 
   const updateProgress = useCallback((currentTime: number, duration: number) => {
     setState(prev => ({
@@ -78,11 +85,12 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   }, []);
 
   const setShowMiniPlayer = useCallback((show: boolean) => {
+    console.log('Setting mini player visibility:', show, 'Current book:', state.currentBook);
     setState(prev => ({
       ...prev,
       showMiniPlayer: show,
     }));
-  }, []);
+  }, [state.currentBook]);
 
   return (
     <AudioPlayerContext.Provider

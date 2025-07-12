@@ -8,8 +8,14 @@ const MiniPlayer: React.FC = () => {
   const { state, togglePlayback, stopPlayback } = useAudioPlayer();
   const navigate = useNavigate();
 
-  console.log('MiniPlayer render:', { showMiniPlayer: state.showMiniPlayer, currentBook: state.currentBook, isPlaying: state.isPlaying });
+  console.log('MiniPlayer render:', { 
+    showMiniPlayer: state.showMiniPlayer, 
+    currentBook: state.currentBook?.title, 
+    isPlaying: state.isPlaying,
+    hasCurrentBook: !!state.currentBook
+  });
 
+  // Show mini player if there's a current book AND showMiniPlayer is true
   if (!state.showMiniPlayer || !state.currentBook) {
     return null;
   }
@@ -17,16 +23,19 @@ const MiniPlayer: React.FC = () => {
   const progressPercentage = state.duration > 0 ? (state.currentTime / state.duration) * 100 : 0;
 
   const handlePlayerClick = () => {
+    console.log('Mini player clicked, navigating to player');
     navigate(`/player/${state.currentBook?.id}`);
   };
 
   const handleStopClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    console.log('Stop button clicked');
     stopPlayback();
   };
 
   const handlePlayPauseClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    console.log('Play/pause button clicked, current state:', state.isPlaying);
     togglePlayback();
   };
 

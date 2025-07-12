@@ -75,19 +75,27 @@ const PlayerPage = () => {
     fetchBook();
   }, [id, startPlayback]);
 
-  // Hide mini player when on player page, show when leaving if playing
+  // Hide mini player when on player page, show when leaving if audio is playing
   useEffect(() => {
     // Hide mini player when entering player page
+    console.log('PlayerPage mounted, hiding mini player');
     setShowMiniPlayer(false);
     
     // Show mini player when leaving player page if audio is playing
     return () => {
-      console.log('Leaving player page, current state:', { isPlaying: state.isPlaying, currentBook: state.currentBook });
-      if (state.isPlaying && state.currentBook) {
+      console.log('PlayerPage unmounting, current state:', { 
+        isPlaying: state.isPlaying, 
+        currentBook: state.currentBook?.title,
+        hasAudio: !!state.currentBook 
+      });
+      
+      // Show mini player if there's a current book (regardless of playing state)
+      if (state.currentBook) {
+        console.log('Showing mini player because there is a current book');
         setShowMiniPlayer(true);
       }
     };
-  }, [setShowMiniPlayer, state.isPlaying, state.currentBook]);
+  }, [setShowMiniPlayer, state.currentBook]);
 
   const handleShare = () => {
     if (!book) return;
@@ -102,7 +110,7 @@ const PlayerPage = () => {
   };
 
   const handlePlayStateChange = (playing: boolean) => {
-    console.log('Play state changed:', playing);
+    console.log('Play state changed in PlayerPage:', playing);
     // The state will be updated through the audio player context
   };
 
@@ -120,9 +128,15 @@ const PlayerPage = () => {
   };
 
   const handleBackClick = () => {
-    console.log('Back clicked, current state:', { isPlaying: state.isPlaying, currentBook: state.currentBook });
-    // Show mini player if audio is playing
-    if (state.isPlaying && state.currentBook) {
+    console.log('Back clicked, current state:', { 
+      isPlaying: state.isPlaying, 
+      currentBook: state.currentBook?.title,
+      hasAudio: !!state.currentBook 
+    });
+    
+    // Show mini player if there's a current book
+    if (state.currentBook) {
+      console.log('Setting mini player to show before navigation');
       setShowMiniPlayer(true);
     }
     navigate(-1);
