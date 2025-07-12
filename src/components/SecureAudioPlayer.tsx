@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Play, Pause, ChevronDown, RefreshCw, Smartphone, AlertTriangle } from 'lucide-react';
+import { Play, Pause, ChevronDown, Smartphone } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 import {
@@ -9,7 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 
 interface SecureAudioPlayerProps {
   bookId: string;
@@ -26,18 +25,17 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
   const { state: globalAudioState, togglePlayback, seekTo: globalSeekTo, audioRef } = useAudioPlayer();
   const [currentSpeed, setCurrentSpeed] = React.useState(1);
   
-  // Use global audio state
   const isPlaying = globalAudioState.isPlaying;
   const currentTime = globalAudioState.currentTime;
   const duration = globalAudioState.duration;
-  const isLoading = !globalAudioState.currentBook;
+  const isLoading = globalAudioState.isLoading;
 
-  // Sync with onPlayStateChange callback
   React.useEffect(() => {
     onPlayStateChange?.(isPlaying);
   }, [isPlaying, onPlayStateChange]);
 
   const formatTime = (seconds: number) => {
+    if (isNaN(seconds) || seconds < 0) return '0:00';
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
@@ -45,7 +43,9 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTime = parseFloat(e.target.value);
-    globalSeekTo(newTime);
+    if (!isNaN(newTime)) {
+      globalSeekTo(newTime);
+    }
   };
 
   const handleSpeedChange = (speed: number) => {
@@ -62,7 +62,6 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
 
   const speedOptions = [0.75, 1, 1.25, 1.5, 2];
 
-  // Custom Skip Button Component
   const SkipButton = ({ direction, onClick, disabled }: { 
     direction: 'backward' | 'forward'; 
     onClick: () => void;
@@ -118,7 +117,7 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
           type="range"
           min="0"
           max={duration || 0}
-          value={currentTime}
+          value={currentTime || 0}
           onChange={handleSeek}
           className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
           style={{
@@ -133,15 +132,14 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
 
       {/* Control Buttons */}
       <div className="flex items-center justify-center gap-6 mb-8">
-        {/* Skip Backward 10s */}
         <SkipButton 
           direction="backward"
           onClick={() => skip(-10)}
         />
 
-        {/* Main Play/Pause Button */}
         <button
           onClick={togglePlayback}
+          disabled={isLoading}
           className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-purple-500/25 disabled:opacity-50 hover:scale-105"
         >
           {isPlaying ? (
@@ -151,7 +149,6 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
           )}
         </button>
 
-        {/* Skip Forward 10s */}
         <SkipButton 
           direction="forward"
           onClick={() => skip(10)}

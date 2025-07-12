@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Share, Heart, ChevronDown } from "lucide-react";
@@ -56,14 +55,19 @@ const PlayerPage = () => {
           };
           setBook(bookData);
           
-          // Initialize global audio state
-          startPlayback({
-            id: data.id,
-            title: data.title,
-            author: data.author,
-            cover: data.cover_url || '',
-            audioPath: data.audio_path || '',
-          });
+          // Only initialize if it's a different book or no current book
+          if (!state.currentBook || state.currentBook.id !== data.id) {
+            console.log('Initializing new book:', data.title);
+            startPlayback({
+              id: data.id,
+              title: data.title,
+              author: data.author,
+              cover: data.cover_url || '',
+              audioPath: data.audio_path || '',
+            });
+          } else {
+            console.log('Same book already loaded, not reinitializing');
+          }
         }
       } catch (error) {
         console.error('Error:', error);
@@ -73,15 +77,13 @@ const PlayerPage = () => {
     };
 
     fetchBook();
-  }, [id, startPlayback]);
+  }, [id, startPlayback, state.currentBook]);
 
-  // Hide mini player when on player page, show when leaving if audio is playing
+  // Hide mini player when on player page, show when leaving if audio is available
   useEffect(() => {
-    // Hide mini player when entering player page
     console.log('PlayerPage mounted, hiding mini player');
     setShowMiniPlayer(false);
     
-    // Show mini player when leaving player page if audio is playing
     return () => {
       console.log('PlayerPage unmounting, current state:', { 
         isPlaying: state.isPlaying, 
@@ -89,7 +91,6 @@ const PlayerPage = () => {
         hasAudio: !!state.currentBook 
       });
       
-      // Show mini player if there's a current book (regardless of playing state)
       if (state.currentBook) {
         console.log('Showing mini player because there is a current book');
         setShowMiniPlayer(true);
@@ -111,7 +112,6 @@ const PlayerPage = () => {
 
   const handlePlayStateChange = (playing: boolean) => {
     console.log('Play state changed in PlayerPage:', playing);
-    // The state will be updated through the audio player context
   };
 
   const handleLikeClick = () => {
@@ -134,7 +134,6 @@ const PlayerPage = () => {
       hasAudio: !!state.currentBook 
     });
     
-    // Show mini player if there's a current book
     if (state.currentBook) {
       console.log('Setting mini player to show before navigation');
       setShowMiniPlayer(true);

@@ -13,6 +13,7 @@ interface AudioPlayerState {
   currentTime: number;
   duration: number;
   showMiniPlayer: boolean;
+  isLoading: boolean;
 }
 
 interface AudioPlayerContextType {
@@ -43,9 +44,11 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     currentTime: 0,
     duration: 0,
     showMiniPlayer: false,
+    isLoading: false,
   });
 
   const audioRef = useRef<HTMLAudioElement>(null);
+  const isInitializingRef = useRef(false);
 
   const generateAudioUrl = (audioPath: string): string => {
     if (!audioPath) {
@@ -55,13 +58,11 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     console.log('Generating audio URL for path:', audioPath);
     
-    // If it's already a full URL, return as is
     if (audioPath.startsWith('http://') || audioPath.startsWith('https://')) {
       console.log('Audio path is already a full URL:', audioPath);
       return audioPath;
     }
     
-    // Generate public URL from path
     const baseUrl = 'https://xtqzxtqmqxqorpamsllm.supabase.co/storage/v1/object/public/book-audios/';
     const finalUrl = baseUrl + audioPath;
     
@@ -72,19 +73,26 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const startPlayback = useCallback(async (book: AudioPlayerState['currentBook']) => {
     console.log('Starting playback for book:', book);
     
-    if (!book || !audioRef.current) {
-      console.error('No book or audio ref available');
+    if (!book || !audioRef.current || isInitializingRef.current) {
+      console.error('No book, audio ref, or already initializing');
       return;
     }
+
+    // If it's the same book, don't reinitialize
+    if (state.currentBook?.id === book.id && audioRef.current.src) {
+      console.log('Same book already loaded, not reinitializing');
+      return;
+    }
+
+    isInitializingRef.current = true;
 
     setState(prev => ({
       ...prev,
       currentBook: book,
-      isPlaying: false, // Will be set to true when audio actually starts playing
+      isLoading: true,
     }));
 
     try {
-      // Generate and set audio source
       const audioUrl = generateAudioUrl(book.audioPath);
       if (!audioUrl) {
         console.error('Failed to generate audio URL');
@@ -92,39 +100,47 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       }
 
       console.log('Setting audio source to:', audioUrl);
-      audioRef.current.src = audioUrl;
-      audioRef.current.load();
+      
+      // Only set source if it's different
+      if (audioRef.current.src !== audioUrl) {
+        audioRef.current.src = audioUrl;
+        audioRef.current.load();
 
-      // Wait for audio to be ready
-      await new Promise<void>((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          reject(new Error('Audio load timeout'));
-        }, 10000);
+        // Wait for audio to be ready
+        await new Promise<void>((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            reject(new Error('Audio load timeout'));
+          }, 10000);
 
-        const handleCanPlay = () => {
-          clearTimeout(timeout);
-          audioRef.current?.removeEventListener('canplay', handleCanPlay);
-          audioRef.current?.removeEventListener('error', handleError);
-          resolve();
-        };
+          const handleCanPlay = () => {
+            clearTimeout(timeout);
+            audioRef.current?.removeEventListener('canplay', handleCanPlay);
+            audioRef.current?.removeEventListener('error', handleError);
+            resolve();
+          };
 
-        const handleError = (e: Event) => {
-          clearTimeout(timeout);
-          audioRef.current?.removeEventListener('canplay', handleCanPlay);
-          audioRef.current?.removeEventListener('error', handleError);
-          console.error('Audio load error:', e);
-          reject(new Error('Audio load failed'));
-        };
+          const handleError = (e: Event) => {
+            clearTimeout(timeout);
+            audioRef.current?.removeEventListener('canplay', handleCanPlay);
+            audioRef.current?.removeEventListener('error', handleError);
+            console.error('Audio load error:', e);
+            reject(new Error('Audio load failed'));
+          };
 
-        audioRef.current?.addEventListener('canplay', handleCanPlay);
-        audioRef.current?.addEventListener('error', handleError);
-      });
+          audioRef.current?.addEventListener('canplay', handleCanPlay);
+          audioRef.current?.addEventListener('error', handleError);
+        });
+      }
 
       console.log('Audio loaded successfully');
+      setState(prev => ({ ...prev, isLoading: false }));
     } catch (error) {
       console.error('Error in startPlayback:', error);
+      setState(prev => ({ ...prev, isLoading: false }));
+    } finally {
+      isInitializingRef.current = false;
     }
-  }, []);
+  }, [state.currentBook?.id]);
 
   const stopPlayback = useCallback(() => {
     console.log('Stopping playback');
@@ -139,6 +155,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       showMiniPlayer: false,
       currentTime: 0,
       duration: 0,
+      isLoading: false,
     }));
   }, []);
 
@@ -152,23 +169,9 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       if (state.isPlaying) {
         console.log('Pausing audio');
         audioRef.current.pause();
-        setState(prev => ({ ...prev, isPlaying: false }));
       } else {
-        console.log('Playing audio');
-        
-        // Ensure audio source is set
-        if (!audioRef.current.src || audioRef.current.src === window.location.href) {
-          const audioUrl = generateAudioUrl(state.currentBook.audioPath);
-          if (audioUrl) {
-            audioRef.current.src = audioUrl;
-            audioRef.current.load();
-            // Wait a bit for the audio to load
-            await new Promise(resolve => setTimeout(resolve, 100));
-          }
-        }
-
+        console.log('Playing audio from current position:', audioRef.current.currentTime);
         await audioRef.current.play();
-        setState(prev => ({ ...prev, isPlaying: true }));
       }
     } catch (error) {
       console.error('Error toggling playback:', error);
@@ -185,7 +188,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   }, []);
 
   const setShowMiniPlayer = useCallback((show: boolean) => {
-    console.log('Setting mini player visibility:', show, 'Current book:', state.currentBook);
+    console.log('Setting mini player visibility:', show, 'Current book:', state.currentBook?.title);
     setState(prev => ({
       ...prev,
       showMiniPlayer: show,
@@ -193,15 +196,16 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   }, [state.currentBook]);
 
   const seekTo = useCallback((time: number) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = time;
+    console.log('Seeking to:', time);
+    if (audioRef.current && !isNaN(time) && time >= 0) {
+      audioRef.current.currentTime = Math.min(time, audioRef.current.duration || time);
       setState(prev => ({ ...prev, currentTime: time }));
     }
   }, []);
 
   // Audio event handlers
   const handleTimeUpdate = useCallback(() => {
-    if (audioRef.current) {
+    if (audioRef.current && !isNaN(audioRef.current.currentTime)) {
       const currentTime = audioRef.current.currentTime;
       const duration = audioRef.current.duration || 0;
       updateProgress(currentTime, duration);
@@ -211,7 +215,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const handleLoadedMetadata = useCallback(() => {
     if (audioRef.current) {
       const duration = audioRef.current.duration;
-      setState(prev => ({ ...prev, duration }));
+      setState(prev => ({ ...prev, duration, isLoading: false }));
       console.log('Audio metadata loaded, duration:', duration);
     }
   }, []);
@@ -232,7 +236,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const handleError = useCallback((e: Event) => {
     console.error('Audio error:', e);
-    setState(prev => ({ ...prev, isPlaying: false }));
+    setState(prev => ({ ...prev, isPlaying: false, isLoading: false }));
   }, []);
 
   // Setup audio event listeners
