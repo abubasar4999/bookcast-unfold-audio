@@ -59,17 +59,17 @@ const SearchPage = () => {
     : (trendingBooks.length > 0 ? trendingBooks.slice(0, 3) : allBooks.slice(0, 3));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950/20 pt-12 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-purple-950/40 to-blue-950/30 pt-12 pb-20">
       {/* Search Bar */}
       <div className="px-4 mb-6">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600" size={20} />
           <Input
             type="text"
             placeholder="Search podcasts, episodes, guests..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-12 bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:border-purple-500 rounded-lg"
+            className="pl-10 h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-600 focus:border-purple-500 rounded-lg shadow-sm"
           />
         </div>
       </div>

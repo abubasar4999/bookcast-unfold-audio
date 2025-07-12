@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Share, Heart, ChevronDown } from "lucide-react";
@@ -148,7 +149,7 @@ const PlayerPage = () => {
 
   if (loading || isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950/20 flex items-center justify-center">
+      <div className="h-screen bg-gradient-to-br from-gray-950 via-purple-950/40 to-blue-950/30 flex items-center justify-center">
         <div className="text-white text-lg">Loading...</div>
       </div>
     );
@@ -156,14 +157,14 @@ const PlayerPage = () => {
 
   if (!book) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950/20 flex items-center justify-center">
+      <div className="h-screen bg-gradient-to-br from-gray-950 via-purple-950/40 to-blue-950/30 flex items-center justify-center">
         <div className="text-white text-lg">Book not found</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950/20 flex flex-col overflow-hidden">
+    <div className="h-screen bg-gradient-to-br from-gray-950 via-purple-950/40 to-blue-950/30 flex flex-col overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between p-4 pt-12 flex-shrink-0">
         <button
@@ -184,34 +185,33 @@ const PlayerPage = () => {
         </button>
       </div>
 
-      {/* Main Content - Optimized for viewport */}
-      <div className="flex-1 flex flex-col px-6 min-h-0">
-        {/* Album Art - Responsive sizing */}
-        <div className="flex-1 flex items-center justify-center py-4 min-h-0">
-          <div className="w-full max-w-xs md:max-w-sm lg:max-w-md">
+      {/* Main Content - Optimized for single viewport */}
+      <div className="flex-1 flex flex-col px-6 py-4 min-h-0">
+        {/* Album Art - Fixed size to prevent overflow */}
+        <div className="flex-shrink-0 flex items-center justify-center mb-6">
+          <div className="w-64 h-64 md:w-72 md:h-72">
             <img
               src={book.cover || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop'}
               alt={book.title}
-              className="w-full aspect-square object-cover rounded-2xl shadow-2xl"
+              className="w-full h-full object-cover rounded-2xl shadow-2xl"
             />
           </div>
         </div>
 
-        {/* Player Controls Section */}
-        <div className="flex-shrink-0 pb-8 mobile-safe-bottom">
-          {/* Track Info */}
-          <div className="text-center mb-6">
-            <h1 className="text-xl md:text-2xl font-bold text-white mb-2 leading-tight">
-              {book.title}
-            </h1>
-            <p className="text-gray-400 mb-1">{book.author}</p>
-            <p className="text-gray-500 text-sm">
-              {book.genre}
-              {book.duration && ` • ${book.duration}`}
-            </p>
-          </div>
+        {/* Track Info - Compact */}
+        <div className="text-center mb-6 flex-shrink-0">
+          <h1 className="text-lg md:text-xl font-bold text-white mb-1 leading-tight line-clamp-2">
+            {book.title}
+          </h1>
+          <p className="text-gray-400 text-sm mb-1">{book.author}</p>
+          <p className="text-gray-500 text-xs">
+            {book.genre}
+            {book.duration && ` • ${book.duration}`}
+          </p>
+        </div>
 
-          {/* Secure Audio Player */}
+        {/* Player Controls - Flex remaining space */}
+        <div className="flex-1 flex flex-col justify-between min-h-0">
           <SecureAudioPlayer
             bookId={id || '1'}
             audioPath={book.audio_path || 'alchemist.mp3'}
@@ -219,12 +219,12 @@ const PlayerPage = () => {
           />
 
           {/* Bottom Actions */}
-          <div className="flex items-center justify-between mt-6">
+          <div className="flex items-center justify-between mt-4 pb-4">
             <button 
               className="p-2 hover:bg-gray-800 rounded-full transition-colors"
               onClick={handleShare}
             >
-              <Share size={24} className="text-gray-400 hover:text-white" />
+              <Share size={20} className="text-gray-400 hover:text-white" />
             </button>
 
             <button
@@ -232,7 +232,7 @@ const PlayerPage = () => {
               className="p-2 hover:bg-gray-800 rounded-full transition-colors"
             >
               <Heart
-                size={24}
+                size={20}
                 className={`${
                   isLiked
                     ? "text-purple-400 fill-current"

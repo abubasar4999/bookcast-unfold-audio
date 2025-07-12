@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Play, Pause, SkipBack, SkipForward, RotateCcw, ChevronDown, RefreshCw, Smartphone, AlertTriangle } from 'lucide-react';
+import { Play, Pause, ChevronDown, RefreshCw, Smartphone, AlertTriangle } from 'lucide-react';
 import { useSecureAudio } from '@/hooks/useSecureAudio';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -74,6 +74,32 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
 
   const speedOptions = [0.75, 1, 1.25, 1.5, 2];
 
+  // Custom Skip Button Component
+  const SkipButton = ({ direction, onClick, disabled }: { 
+    direction: 'backward' | 'forward'; 
+    onClick: () => void;
+    disabled?: boolean;
+  }) => (
+    <button 
+      onClick={onClick}
+      disabled={disabled}
+      className="relative w-14 h-14 bg-gray-800/60 hover:bg-gray-700/80 rounded-full flex items-center justify-center transition-all duration-200 border border-gray-600/30 hover:border-purple-500/50 group disabled:opacity-50"
+    >
+      <div className="relative">
+        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+        <svg viewBox="0 0 48 48" className="w-8 h-8 text-white relative z-10">
+          <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" strokeWidth="2"/>
+          {direction === 'backward' ? (
+            <path d="M28 16l-8 8 8 8M20 24h8" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+          ) : (
+            <path d="M20 16l8 8-8 8M28 24h-8" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+          )}
+          <text x="24" y="30" textAnchor="middle" className="text-xs fill-current font-bold">10</text>
+        </svg>
+      </div>
+    </button>
+  );
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-4">
@@ -110,7 +136,7 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-md mx-auto">
       {/* Audio element */}
       <audio
         ref={audioRef}
@@ -147,14 +173,14 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
       )}
 
       {/* Progress Bar */}
-      <div className="mb-6">
+      <div className="mb-8">
         <input
           type="range"
           min="0"
           max={duration || 0}
           value={currentTime}
           onChange={handleSeek}
-          className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+          className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
           style={{
             background: `linear-gradient(to right, #a855f7 0%, #a855f7 ${(currentTime / duration) * 100}%, #374151 ${(currentTime / duration) * 100}%, #374151 100%)`
           }}
@@ -163,70 +189,40 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(duration)}</span>
         </div>
-        
-        {/* Resume indicator */}
-        {user && progress && progress.current_position > 0 && !usingDemoAudio && (
-          <div className="flex items-center text-purple-400 text-xs mt-1">
-            <RotateCcw size={12} className="mr-1" />
-            <span>Resume from {formatTime(progress.current_position)}</span>
-          </div>
-        )}
       </div>
 
       {/* Control Buttons */}
-      <div className="flex items-center justify-center gap-4 md:gap-6">
+      <div className="flex items-center justify-center gap-6 mb-8">
         {/* Skip Backward 10s */}
-        <button 
+        <SkipButton 
+          direction="backward"
           onClick={() => skip(-10)}
-          className="relative w-12 h-12 md:w-14 md:h-14 bg-gray-800/60 hover:bg-gray-700/80 rounded-full flex items-center justify-center transition-all duration-200 border border-gray-600/30 hover:border-purple-500/50 group"
           disabled={!audioUrl}
-        >
-          <div className="relative">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <svg viewBox="0 0 24 24" className="w-6 h-6 md:w-7 md:h-7 text-white relative z-10">
-              <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="1.5"/>
-              <path d="M8 12l4-4v3h4v2h-4v3l-4-4z" fill="currentColor"/>
-              <text x="12" y="16" textAnchor="middle" className="text-xs fill-current font-bold">10</text>
-            </svg>
-          </div>
-        </button>
+        />
 
         {/* Main Play/Pause Button */}
-        <div className="relative">
-          <button
-            onClick={togglePlay}
-            className={`w-16 h-16 md:w-20 md:h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-purple-500/25 disabled:opacity-50 ${
-              isMobile ? 'active:scale-95' : 'hover:scale-105'
-            }`}
-            disabled={!audioUrl || isLoading}
-          >
-            {isPlaying ? (
-              <Pause size={32} className="text-white ml-0" />
-            ) : (
-              <Play size={32} className="text-white ml-1" />
-            )}
-          </button>
-        </div>
+        <button
+          onClick={togglePlay}
+          className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-purple-500/25 disabled:opacity-50 hover:scale-105"
+          disabled={!audioUrl || isLoading}
+        >
+          {isPlaying ? (
+            <Pause size={32} className="text-white" />
+          ) : (
+            <Play size={32} className="text-white ml-1" />
+          )}
+        </button>
 
         {/* Skip Forward 10s */}
-        <button 
+        <SkipButton 
+          direction="forward"
           onClick={() => skip(10)}
-          className="relative w-12 h-12 md:w-14 md:h-14 bg-gray-800/60 hover:bg-gray-700/80 rounded-full flex items-center justify-center transition-all duration-200 border border-gray-600/30 hover:border-purple-500/50 group"
           disabled={!audioUrl}
-        >
-          <div className="relative">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <svg viewBox="0 0 24 24" className="w-6 h-6 md:w-7 md:h-7 text-white relative z-10">
-              <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="1.5"/>
-              <path d="M16 12l-4-4v3H8v2h4v3l4-4z" fill="currentColor"/>
-              <text x="12" y="16" textAnchor="middle" className="text-xs fill-current font-bold">10</text>
-            </svg>
-          </div>
-        </button>
+        />
       </div>
 
       {/* Playback Speed Control */}
-      <div className="flex items-center justify-center mt-6">
+      <div className="flex items-center justify-center">
         <DropdownMenu>
           <DropdownMenuTrigger className="bg-gray-800/60 hover:bg-gray-700/80 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors border border-gray-600/30 hover:border-purple-500/50">
             <span className="text-sm font-medium">{currentSpeed}x Speed</span>
