@@ -20,11 +20,10 @@ const PlayerPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, loading } = useAuth();
-  const { startPlayback, setShowMiniPlayer, updateProgress } = useAudioPlayer();
+  const { state, startPlayback, setShowMiniPlayer, updateProgress } = useAudioPlayer();
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
 
   // Redirect to auth if not logged in
@@ -76,16 +75,19 @@ const PlayerPage = () => {
     fetchBook();
   }, [id, startPlayback]);
 
-  // Hide mini player when on player page
+  // Hide mini player when on player page, show when leaving if playing
   useEffect(() => {
+    // Hide mini player when entering player page
     setShowMiniPlayer(false);
+    
+    // Show mini player when leaving player page if audio is playing
     return () => {
-      // Show mini player when leaving if audio is playing
-      if (isPlaying) {
+      console.log('Leaving player page, current state:', { isPlaying: state.isPlaying, currentBook: state.currentBook });
+      if (state.isPlaying && state.currentBook) {
         setShowMiniPlayer(true);
       }
     };
-  }, [setShowMiniPlayer, isPlaying]);
+  }, [setShowMiniPlayer, state.isPlaying, state.currentBook]);
 
   const handleShare = () => {
     if (!book) return;
@@ -100,7 +102,8 @@ const PlayerPage = () => {
   };
 
   const handlePlayStateChange = (playing: boolean) => {
-    setIsPlaying(playing);
+    console.log('Play state changed:', playing);
+    // The state will be updated through the audio player context
   };
 
   const handleLikeClick = () => {
@@ -117,7 +120,9 @@ const PlayerPage = () => {
   };
 
   const handleBackClick = () => {
-    if (isPlaying) {
+    console.log('Back clicked, current state:', { isPlaying: state.isPlaying, currentBook: state.currentBook });
+    // Show mini player if audio is playing
+    if (state.isPlaying && state.currentBook) {
       setShowMiniPlayer(true);
     }
     navigate(-1);
@@ -149,7 +154,7 @@ const PlayerPage = () => {
 
   if (loading || isLoading) {
     return (
-      <div className="h-screen bg-gradient-to-br from-gray-950 via-purple-950/40 to-blue-950/30 flex items-center justify-center">
+      <div className="h-screen bg-futuristic flex items-center justify-center">
         <div className="text-white text-lg">Loading...</div>
       </div>
     );
@@ -157,14 +162,14 @@ const PlayerPage = () => {
 
   if (!book) {
     return (
-      <div className="h-screen bg-gradient-to-br from-gray-950 via-purple-950/40 to-blue-950/30 flex items-center justify-center">
+      <div className="h-screen bg-futuristic flex items-center justify-center">
         <div className="text-white text-lg">Book not found</div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-gray-950 via-purple-950/40 to-blue-950/30 flex flex-col overflow-hidden">
+    <div className="h-screen bg-futuristic flex flex-col overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between p-4 pt-12 flex-shrink-0">
         <button

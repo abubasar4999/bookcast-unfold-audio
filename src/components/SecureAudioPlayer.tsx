@@ -3,6 +3,7 @@ import React from 'react';
 import { Play, Pause, ChevronDown, RefreshCw, Smartphone, AlertTriangle } from 'lucide-react';
 import { useSecureAudio } from '@/hooks/useSecureAudio';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +24,7 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
   onPlayStateChange
 }) => {
   const { user } = useAuth();
+  const { state: globalAudioState, togglePlayback, updateProgress } = useAudioPlayer();
   const [currentSpeed, setCurrentSpeed] = React.useState(1);
   
   const {
@@ -45,9 +47,20 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
     initializeAudio
   } = useSecureAudio({ bookId, audioPath });
 
+  // Sync with global audio state
   React.useEffect(() => {
     onPlayStateChange?.(isPlaying);
-  }, [isPlaying, onPlayStateChange]);
+    // Update global progress
+    if (isPlaying && currentTime > 0 && duration > 0) {
+      updateProgress(currentTime, duration);
+    }
+  }, [isPlaying, currentTime, duration, onPlayStateChange, updateProgress]);
+
+  // Sync play state with global context
+  const handleTogglePlay = React.useCallback(() => {
+    togglePlay();
+    togglePlayback(); // Sync with global state
+  }, [togglePlay, togglePlayback]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -74,7 +87,7 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
 
   const speedOptions = [0.75, 1, 1.25, 1.5, 2];
 
-  // Custom Skip Button Component
+  // Custom Skip Button Component with improved design
   const SkipButton = ({ direction, onClick, disabled }: { 
     direction: 'backward' | 'forward'; 
     onClick: () => void;
@@ -83,19 +96,29 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
     <button 
       onClick={onClick}
       disabled={disabled}
-      className="relative w-14 h-14 bg-gray-800/60 hover:bg-gray-700/80 rounded-full flex items-center justify-center transition-all duration-200 border border-gray-600/30 hover:border-purple-500/50 group disabled:opacity-50"
+      className="relative w-12 h-12 bg-gray-800/60 hover:bg-gray-700/80 rounded-full flex items-center justify-center transition-all duration-200 border border-gray-600/30 hover:border-purple-500/50 group disabled:opacity-50"
     >
-      <div className="relative">
+      <div className="relative flex items-center justify-center">
         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-        <svg viewBox="0 0 48 48" className="w-8 h-8 text-white relative z-10">
-          <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" strokeWidth="2"/>
+        <div className="relative z-10 flex items-center">
           {direction === 'backward' ? (
-            <path d="M28 16l-8 8 8 8M20 24h8" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+            <div className="flex items-center text-white text-xs font-bold">
+              <span className="mr-1">10</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2l-7 7 7 7"/>
+                <path d="M21 9H9"/>
+              </svg>
+            </div>
           ) : (
-            <path d="M20 16l8 8-8 8M28 24h-8" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+            <div className="flex items-center text-white text-xs font-bold">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 9h12"/>
+                <path d="M12 2l7 7-7 7"/>
+              </svg>
+              <span className="ml-1">10</span>
+            </div>
           )}
-          <text x="24" y="30" textAnchor="middle" className="text-xs fill-current font-bold">10</text>
-        </svg>
+        </div>
       </div>
     </button>
   );
@@ -202,7 +225,7 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
 
         {/* Main Play/Pause Button */}
         <button
-          onClick={togglePlay}
+          onClick={handleTogglePlay}
           className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-purple-500/25 disabled:opacity-50 hover:scale-105"
           disabled={!audioUrl || isLoading}
         >
