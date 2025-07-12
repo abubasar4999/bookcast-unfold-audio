@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowDown, Play, Heart } from 'lucide-react';
@@ -29,6 +30,7 @@ const BookDetailPage = () => {
       if (!id) return;
       
       try {
+        console.log('Fetching book with ID:', id);
         const { data, error } = await supabase
           .from('books')
           .select('*')
@@ -41,6 +43,7 @@ const BookDetailPage = () => {
         }
 
         if (data) {
+          console.log('Book data fetched:', data);
           setBook({
             ...data,
             cover: data.cover_url,
@@ -80,7 +83,7 @@ const BookDetailPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950/20 flex items-center justify-center">
+      <div className="min-h-screen bg-transparent flex items-center justify-center">
         <div className="text-white text-lg">Loading...</div>
       </div>
     );
@@ -88,7 +91,7 @@ const BookDetailPage = () => {
 
   if (!book) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950/20 flex items-center justify-center">
+      <div className="min-h-screen bg-transparent flex items-center justify-center">
         <div className="text-white text-lg">Book not found</div>
       </div>
     );
@@ -96,7 +99,7 @@ const BookDetailPage = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950/20 pb-20">
+      <div className="min-h-screen bg-transparent pb-20">
         {/* Hero Section with Book Cover */}
         <div className="relative h-[70vh] overflow-hidden">
           <div className="absolute inset-0">
@@ -105,7 +108,7 @@ const BookDetailPage = () => {
               alt={book.title}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
           </div>
           
           {/* Back Button */}
@@ -168,7 +171,7 @@ const BookDetailPage = () => {
         {/* Content Section */}
         <div className="px-4 py-6 space-y-6">
           {/* Book Info */}
-          <div className="bg-gradient-to-r from-gray-900/50 to-gray-800/50 rounded-xl p-4 backdrop-blur-sm">
+          <div className="bg-black/30 backdrop-blur-sm rounded-xl p-4">
             <h3 className="text-white font-semibold mb-2">Book Details</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">

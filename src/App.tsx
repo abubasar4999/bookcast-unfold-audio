@@ -11,6 +11,7 @@ import LibraryPage from '@/pages/LibraryPage';
 import ProfilePage from '@/pages/ProfilePage';
 import AuthPage from '@/pages/AuthPage';
 import PlayerPage from '@/pages/PlayerPage';
+import BookDetailPage from '@/pages/BookDetailPage';
 import ResponsiveNavigation from '@/components/ResponsiveNavigation';
 import { AudioPlayerProvider } from '@/contexts/AudioPlayerContext';
 import MiniPlayer from '@/components/MiniPlayer';
@@ -38,7 +39,7 @@ function App() {
       <AuthProvider>
         <AudioPlayerProvider>
           <Router>
-            <div className="min-h-screen bg-background">
+            <div className="min-h-screen bg-app-gradient">
               <Toaster />
               {showSplash ? (
                 <SplashScreen onComplete={() => setShowSplash(false)} />
@@ -52,6 +53,7 @@ function App() {
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/player/:id" element={<PlayerPage />} />
+                    <Route path="/book/:id" element={<BookDetailPage />} />
                     
                     {/* Admin routes */}
                     <Route path="/admin/login" element={<AdminLogin />} />

@@ -167,7 +167,7 @@ const PlayerPage = () => {
 
   if (loading || isLoading) {
     return (
-      <div className="h-screen bg-futuristic flex items-center justify-center">
+      <div className="h-screen bg-transparent flex items-center justify-center">
         <div className="text-white text-lg">Loading...</div>
       </div>
     );
@@ -175,14 +175,14 @@ const PlayerPage = () => {
 
   if (!book) {
     return (
-      <div className="h-screen bg-futuristic flex items-center justify-center">
+      <div className="h-screen bg-transparent flex items-center justify-center">
         <div className="text-white text-lg">Book not found</div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen bg-futuristic flex flex-col overflow-hidden">
+    <div className="h-screen bg-transparent flex flex-col overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between p-4 pt-12 flex-shrink-0">
         <button
