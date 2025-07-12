@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 
 interface AudioPlayerState {
   isPlaying: boolean;
@@ -17,11 +17,13 @@ interface AudioPlayerState {
 
 interface AudioPlayerContextType {
   state: AudioPlayerState;
+  audioRef: React.RefObject<HTMLAudioElement>;
   startPlayback: (book: AudioPlayerState['currentBook']) => void;
   stopPlayback: () => void;
   togglePlayback: () => void;
   updateProgress: (currentTime: number, duration: number) => void;
   setShowMiniPlayer: (show: boolean) => void;
+  seekTo: (time: number) => void;
 }
 
 const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(undefined);
@@ -43,17 +45,29 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     showMiniPlayer: false,
   });
 
+  const audioRef = useRef<HTMLAudioElement>(null);
+
   const startPlayback = useCallback((book: AudioPlayerState['currentBook']) => {
     console.log('Starting playback for book:', book);
     setState(prev => ({
       ...prev,
       currentBook: book,
-      isPlaying: true,
+      isPlaying: false, // Will be set to true when audio actually starts playing
     }));
+
+    // Set audio source
+    if (audioRef.current && book) {
+      audioRef.current.src = `/audio/${book.audioPath}`;
+      audioRef.current.load();
+    }
   }, []);
 
   const stopPlayback = useCallback(() => {
     console.log('Stopping playback');
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
     setState(prev => ({
       ...prev,
       isPlaying: false,
@@ -64,17 +78,26 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }));
   }, []);
 
-  const togglePlayback = useCallback(() => {
-    console.log('Toggling playback, current state:', state.isPlaying);
-    setState(prev => {
-      const newIsPlaying = !prev.isPlaying;
-      console.log('New playing state:', newIsPlaying);
-      return {
-        ...prev,
-        isPlaying: newIsPlaying,
-      };
-    });
-  }, [state.isPlaying]);
+  const togglePlayback = useCallback(async () => {
+    if (!audioRef.current || !state.currentBook) {
+      console.log('No audio or book available');
+      return;
+    }
+
+    try {
+      if (state.isPlaying) {
+        console.log('Pausing audio');
+        audioRef.current.pause();
+        setState(prev => ({ ...prev, isPlaying: false }));
+      } else {
+        console.log('Playing audio');
+        await audioRef.current.play();
+        setState(prev => ({ ...prev, isPlaying: true }));
+      }
+    } catch (error) {
+      console.error('Error toggling playback:', error);
+    }
+  }, [state.isPlaying, state.currentBook]);
 
   const updateProgress = useCallback((currentTime: number, duration: number) => {
     setState(prev => ({
@@ -92,18 +115,83 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }));
   }, [state.currentBook]);
 
+  const seekTo = useCallback((time: number) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+      setState(prev => ({ ...prev, currentTime: time }));
+    }
+  }, []);
+
+  // Audio event handlers
+  const handleTimeUpdate = useCallback(() => {
+    if (audioRef.current) {
+      const currentTime = audioRef.current.currentTime;
+      const duration = audioRef.current.duration || 0;
+      updateProgress(currentTime, duration);
+    }
+  }, [updateProgress]);
+
+  const handleLoadedMetadata = useCallback(() => {
+    if (audioRef.current) {
+      const duration = audioRef.current.duration;
+      setState(prev => ({ ...prev, duration }));
+    }
+  }, []);
+
+  const handleEnded = useCallback(() => {
+    setState(prev => ({ ...prev, isPlaying: false, currentTime: 0 }));
+  }, []);
+
+  const handlePlay = useCallback(() => {
+    setState(prev => ({ ...prev, isPlaying: true }));
+  }, []);
+
+  const handlePause = useCallback(() => {
+    setState(prev => ({ ...prev, isPlaying: false }));
+  }, []);
+
+  // Setup audio event listeners
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+
+    return () => {
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+    };
+  }, [handleTimeUpdate, handleLoadedMetadata, handleEnded, handlePlay, handlePause]);
+
   return (
     <AudioPlayerContext.Provider
       value={{
         state,
+        audioRef,
         startPlayback,
         stopPlayback,
         togglePlayback,
         updateProgress,
         setShowMiniPlayer,
+        seekTo,
       }}
     >
       {children}
+      {/* Global audio element that persists across navigation */}
+      <audio
+        ref={audioRef}
+        preload="metadata"
+        className="hidden"
+        playsInline
+        crossOrigin="anonymous"
+      />
     </AudioPlayerContext.Provider>
   );
 };
