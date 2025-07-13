@@ -183,31 +183,31 @@ const PlayerPage = () => {
 
   return (
     <div className="h-screen bg-transparent flex flex-col overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 pt-12 flex-shrink-0">
+      {/* Header - Compact */}
+      <div className="flex items-center justify-between p-4 pt-safe-top flex-shrink-0" style={{ paddingTop: 'max(env(safe-area-inset-top), 2rem)' }}>
         <button
           onClick={handleBackClick}
           className="p-2 hover:bg-gray-800 rounded-full transition-colors"
         >
-          <ChevronDown size={24} className="text-white" />
+          <ChevronDown size={20} className="text-white" />
         </button>
         <div className="text-center">
-          <p className="text-gray-400 text-sm">AUTHENTICATED STREAMING</p>
-          <p className="text-gray-500 text-xs">Progress Saved</p>
+          <p className="text-gray-400 text-xs">AUTHENTICATED STREAMING</p>
+          <p className="text-gray-500 text-[10px]">Progress Saved</p>
         </div>
         <button 
           className="p-2 hover:bg-gray-800 rounded-full transition-colors"
           onClick={handleShare}
         >
-          <Share size={24} className="text-white" />
+          <Share size={20} className="text-white" />
         </button>
       </div>
 
-      {/* Main Content - Optimized for single viewport */}
-      <div className="flex-1 flex flex-col px-6 py-4 min-h-0">
-        {/* Album Art - Fixed size to prevent overflow */}
-        <div className="flex-shrink-0 flex items-center justify-center mb-6">
-          <div className="w-64 h-64 md:w-72 md:h-72">
+      {/* Main Content - Optimized for mobile screens */}
+      <div className="flex-1 flex flex-col px-4 pb-safe-bottom min-h-0" style={{ paddingBottom: 'calc(10vh + env(safe-area-inset-bottom, 1rem))' }}>
+        {/* Album Art - Responsive sizing */}
+        <div className="flex-shrink-0 flex items-center justify-center mb-4">
+          <div className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64">
             <img
               src={book.cover || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop'}
               alt={book.title}
@@ -217,8 +217,8 @@ const PlayerPage = () => {
         </div>
 
         {/* Track Info - Compact */}
-        <div className="text-center mb-6 flex-shrink-0">
-          <h1 className="text-lg md:text-xl font-bold text-white mb-1 leading-tight line-clamp-2">
+        <div className="text-center mb-4 flex-shrink-0">
+          <h1 className="text-base sm:text-lg font-bold text-white mb-1 leading-tight line-clamp-2 px-2">
             {book.title}
           </h1>
           <p className="text-gray-400 text-sm mb-1">{book.author}</p>
@@ -229,36 +229,36 @@ const PlayerPage = () => {
         </div>
 
         {/* Player Controls - Flex remaining space */}
-        <div className="flex-1 flex flex-col justify-between min-h-0">
+        <div className="flex-1 flex flex-col justify-center min-h-0">
           <SecureAudioPlayer
             bookId={id || '1'}
             audioPath={book.audio_path || 'alchemist.mp3'}
             onPlayStateChange={handlePlayStateChange}
           />
+        </div>
 
-          {/* Bottom Actions */}
-          <div className="flex items-center justify-between mt-4 pb-4">
-            <button 
-              className="p-2 hover:bg-gray-800 rounded-full transition-colors"
-              onClick={handleShare}
-            >
-              <Share size={20} className="text-gray-400 hover:text-white" />
-            </button>
+        {/* Bottom Actions - Fixed at bottom */}
+        <div className="flex items-center justify-between mt-4 flex-shrink-0">
+          <button 
+            className="p-2 hover:bg-gray-800 rounded-full transition-colors"
+            onClick={handleShare}
+          >
+            <Share size={18} className="text-gray-400 hover:text-white" />
+          </button>
 
-            <button
-              onClick={handleLikeClick}
-              className="p-2 hover:bg-gray-800 rounded-full transition-colors"
-            >
-              <Heart
-                size={20}
-                className={`${
-                  isLiked
-                    ? "text-purple-400 fill-current"
-                    : "text-gray-400 hover:text-white"
-                }`}
-              />
-            </button>
-          </div>
+          <button
+            onClick={handleLikeClick}
+            className="p-2 hover:bg-gray-800 rounded-full transition-colors"
+          >
+            <Heart
+              size={18}
+              className={`${
+                isLiked
+                  ? "text-purple-400 fill-current"
+                  : "text-gray-400 hover:text-white"
+              }`}
+            />
+          </button>
         </div>
       </div>
     </div>

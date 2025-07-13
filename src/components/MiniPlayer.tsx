@@ -60,10 +60,15 @@ const MiniPlayer: React.FC = () => {
   };
 
   return (
-    <div className="fixed left-0 right-0 z-50 md:bottom-4 md:px-4" style={{ bottom: 'calc(10vh + 0.5rem)' }}>
+    <div 
+      className="fixed left-0 right-0 z-50 md:bottom-4 md:left-4 md:right-4" 
+      style={{ 
+        bottom: 'calc(10vh + env(safe-area-inset-bottom, 0px))'
+      }}
+    >
       <div 
         onClick={handlePlayerClick}
-        className="bg-gradient-to-r from-gray-900/95 to-gray-800/95 backdrop-blur-lg border-t border-gray-700/50 shadow-2xl cursor-pointer hover:shadow-purple-500/10 transition-all duration-300 md:rounded-lg md:mx-auto md:max-w-full"
+        className="bg-gradient-to-r from-gray-900/95 to-gray-800/95 backdrop-blur-lg border-t border-gray-700/50 shadow-2xl cursor-pointer hover:shadow-purple-500/10 transition-all duration-300 md:rounded-lg md:mx-auto md:max-w-2xl"
       >
         {/* Functional Progress bar */}
         <div 

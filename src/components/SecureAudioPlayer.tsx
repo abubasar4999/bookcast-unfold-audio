@@ -70,26 +70,26 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
     <button 
       onClick={onClick}
       disabled={disabled}
-      className="relative w-12 h-12 bg-gray-800/60 hover:bg-gray-700/80 rounded-full flex items-center justify-center transition-all duration-200 border border-gray-600/30 hover:border-purple-500/50 group disabled:opacity-50"
+      className="relative w-10 h-10 sm:w-12 sm:h-12 bg-gray-800/60 hover:bg-gray-700/80 rounded-full flex items-center justify-center transition-all duration-200 border border-gray-600/30 hover:border-purple-500/50 group disabled:opacity-50"
     >
       <div className="relative flex items-center justify-center">
         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
         <div className="relative z-10 flex items-center">
           {direction === 'backward' ? (
-            <div className="flex items-center text-white text-xs font-bold">
-              <span className="mr-1">10</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <div className="flex items-center text-white text-[10px] sm:text-xs font-bold">
+              <span className="mr-0.5 sm:mr-1">10</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="sm:w-4 sm:h-4">
                 <path d="M12 2l-7 7 7 7"/>
                 <path d="M21 9H9"/>
               </svg>
             </div>
           ) : (
-            <div className="flex items-center text-white text-xs font-bold">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <div className="flex items-center text-white text-[10px] sm:text-xs font-bold">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="sm:w-4 sm:h-4">
                 <path d="M3 9h12"/>
                 <path d="M12 2l7 7-7 7"/>
               </svg>
-              <span className="ml-1">10</span>
+              <span className="ml-0.5 sm:ml-1">10</span>
             </div>
           )}
         </div>
@@ -101,8 +101,8 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
     return (
       <div className="flex flex-col items-center justify-center p-4">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-2"></div>
-        <span className="text-white text-center">
-          <Smartphone size={16} className="inline mr-2" />
+        <span className="text-white text-center text-sm">
+          <Smartphone size={14} className="inline mr-2" />
           Loading audio player...
         </span>
       </div>
@@ -110,9 +110,9 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-sm mx-auto">
       {/* Progress Bar */}
-      <div className="mb-8">
+      <div className="mb-6">
         <input
           type="range"
           min="0"
@@ -124,14 +124,14 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
             background: `linear-gradient(to right, #a855f7 0%, #a855f7 ${(currentTime / duration) * 100}%, #374151 ${(currentTime / duration) * 100}%, #374151 100%)`
           }}
         />
-        <div className="flex justify-between text-gray-400 text-sm mt-2">
+        <div className="flex justify-between text-gray-400 text-xs mt-2">
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(duration)}</span>
         </div>
       </div>
 
       {/* Control Buttons */}
-      <div className="flex items-center justify-center gap-6 mb-8">
+      <div className="flex items-center justify-center gap-4 sm:gap-6 mb-6">
         <SkipButton 
           direction="backward"
           onClick={() => skip(-10)}
@@ -140,12 +140,12 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
         <button
           onClick={togglePlayback}
           disabled={isLoading}
-          className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-purple-500/25 disabled:opacity-50 hover:scale-105"
+          className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-purple-500/25 disabled:opacity-50 hover:scale-105"
         >
           {isPlaying ? (
-            <Pause size={32} className="text-white" />
+            <Pause size={24} className="text-white sm:w-8 sm:h-8" />
           ) : (
-            <Play size={32} className="text-white ml-1" />
+            <Play size={24} className="text-white ml-1 sm:w-8 sm:h-8" />
           )}
         </button>
 
@@ -158,9 +158,9 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
       {/* Playback Speed Control */}
       <div className="flex items-center justify-center">
         <DropdownMenu>
-          <DropdownMenuTrigger className="bg-gray-800/60 hover:bg-gray-700/80 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors border border-gray-600/30 hover:border-purple-500/50">
-            <span className="text-sm font-medium">{currentSpeed}x Speed</span>
-            <ChevronDown size={16} />
+          <DropdownMenuTrigger className="bg-gray-800/60 hover:bg-gray-700/80 text-white px-3 py-2 rounded-lg flex items-center gap-2 transition-colors border border-gray-600/30 hover:border-purple-500/50 text-sm">
+            <span className="font-medium">{currentSpeed}x Speed</span>
+            <ChevronDown size={14} />
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-gray-800 border-gray-700">
             {speedOptions.map((speed) => (
