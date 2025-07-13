@@ -59,7 +59,7 @@ const SearchPage = () => {
     : (trendingBooks.length > 0 ? trendingBooks.slice(0, 3) : allBooks.slice(0, 3));
 
   return (
-    <div className="min-h-screen pt-12 pb-20">
+    <div className="min-h-screen pt-12 pb-32 md:pb-24">
       {/* Search Bar */}
       <div className="px-4 mb-6">
         <div className="relative">
@@ -198,7 +198,7 @@ const SearchPage = () => {
           </div>
 
           {/* Popular Episodes */}
-          <div className="px-4">
+          <div className="px-4 mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white text-readable">Popular Episodes</h2>
               <Button
@@ -253,7 +253,7 @@ const SearchPage = () => {
         </>
       ) : (
         // Search Results
-        <div className="px-4">
+        <div className="px-4 mb-8">
           <p className="text-gray-300 mb-4 text-readable">
             {isSearching ? 'Searching...' : 
               searchResults.length > 0 

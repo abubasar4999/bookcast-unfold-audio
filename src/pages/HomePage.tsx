@@ -37,7 +37,7 @@ const HomePage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950/20 pb-20 md:pb-8 md:pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950/20 pb-32 md:pb-24 md:pt-20">
       {/* Personalized Header with gradient background */}
       <div className="px-4 pt-12 md:pt-8 pb-6 relative">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-900/20 via-transparent to-blue-900/20 rounded-xl" />
@@ -45,7 +45,7 @@ const HomePage = () => {
           <h1 className="text-2xl md:text-4xl font-bold text-white bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent">
             {getUserGreeting()}
           </h1>
-          <p className="text-gray-400 mt-1 text-sm md:text-base">What would you like to listen to today?</p>
+          <p className="text-gray-400 mt-1 text-sm md:text-base text-readable">What would you like to listen to today?</p>
         </div>
       </div>
 
@@ -64,23 +64,25 @@ const HomePage = () => {
       {user && <ContinueListeningSection />}
 
       {/* Genre-Based Carousels with alternating gradient backgrounds */}
-      {genres.map((genreData, index) => (
-        <div key={genreData.title} className="relative mb-8">
-          {index % 2 === 0 && (
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-900/5 via-purple-900/10 to-indigo-900/5 rounded-2xl blur-2xl" />
-          )}
-          {index % 2 === 1 && (
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-900/5 via-pink-900/10 to-purple-900/5 rounded-2xl blur-2xl" />
-          )}
-          <div className="relative">
-            <GenreCarousel
-              title={genreData.title}
-              genre={genreData.genre}
-              isNewlyAdded={genreData.isNewlyAdded}
-            />
+      <div className="mb-8">
+        {genres.map((genreData, index) => (
+          <div key={genreData.title} className="relative mb-8">
+            {index % 2 === 0 && (
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-900/5 via-purple-900/10 to-indigo-900/5 rounded-2xl blur-2xl" />
+            )}
+            {index % 2 === 1 && (
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-900/5 via-pink-900/10 to-purple-900/5 rounded-2xl blur-2xl" />
+            )}
+            <div className="relative">
+              <GenreCarousel
+                title={genreData.title}
+                genre={genreData.genre}
+                isNewlyAdded={genreData.isNewlyAdded}
+              />
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };
