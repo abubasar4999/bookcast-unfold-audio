@@ -43,8 +43,8 @@ const ResponsiveNavigation = () => {
         </div>
       </div>
 
-      {/* Mobile Bottom Navigation - 5% of screen height */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-lg border-t border-gray-800 z-[60]" style={{height: '5vh'}}>
+      {/* Mobile Bottom Navigation - 10% of screen height */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-lg border-t border-gray-800 z-[60]" style={{height: '10vh'}}>
         <div className="flex justify-around items-center h-full max-w-md mx-auto px-2">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
@@ -60,10 +60,10 @@ const ResponsiveNavigation = () => {
                     : 'text-gray-400 hover:text-white'
                 }`}
               >
-                <Icon size={18} />
-                <span className="text-[10px] font-medium mt-0.5 leading-none">{item.label}</span>
+                <Icon size={20} />
+                <span className="text-xs font-medium mt-1 leading-none">{item.label}</span>
                 {isActive && (
-                  <div className="w-1 h-1 bg-purple-400 rounded-full mt-0.5" />
+                  <div className="w-1 h-1 bg-purple-400 rounded-full mt-1" />
                 )}
               </button>
             );

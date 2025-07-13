@@ -138,9 +138,9 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
   }
   
-  /* Mobile navigation now takes 5vh */
+  /* Mobile navigation now takes 10vh */
   .safe-area-padding-bottom {
-    padding-bottom: max(env(safe-area-inset-bottom), calc(5vh + 10px));
+    padding-bottom: max(env(safe-area-inset-bottom), calc(10vh + 10px));
   }
   
   /* Hide scrollbar for webkit browsers */
@@ -155,12 +155,12 @@
   /* Ensure mobile buttons are accessible with mini player space */
   @media (max-width: 768px) {
     .mobile-safe-bottom {
-      margin-bottom: calc(5vh + env(safe-area-inset-bottom, 0px));
+      margin-bottom: calc(10vh + env(safe-area-inset-bottom, 0px));
     }
     
     /* Additional padding for content to avoid mini player overlap */
     .content-safe-bottom {
-      padding-bottom: calc(77px + 5vh + env(safe-area-inset-bottom, 16px));
+      padding-bottom: calc(77px + 10vh + env(safe-area-inset-bottom, 16px));
     }
   }
   
