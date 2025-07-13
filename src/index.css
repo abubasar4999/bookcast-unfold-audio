@@ -138,9 +138,9 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
   }
   
-  /* Mobile navigation now takes 10vh */
+  /* Mobile navigation now takes 10vh with additional safe area */
   .safe-area-padding-bottom {
-    padding-bottom: max(env(safe-area-inset-bottom), calc(10vh + 10px));
+    padding-bottom: calc(10vh + 20px + env(safe-area-inset-bottom, 16px));
   }
   
   /* Hide scrollbar for webkit browsers */
@@ -155,12 +155,12 @@
   /* Ensure mobile buttons are accessible with mini player space */
   @media (max-width: 768px) {
     .mobile-safe-bottom {
-      margin-bottom: calc(10vh + env(safe-area-inset-bottom, 0px));
+      margin-bottom: calc(10vh + 20px + env(safe-area-inset-bottom, 16px));
     }
     
     /* Additional padding for content to avoid mini player overlap */
     .content-safe-bottom {
-      padding-bottom: calc(77px + 10vh + env(safe-area-inset-bottom, 16px));
+      padding-bottom: calc(77px + 10vh + 20px + env(safe-area-inset-bottom, 16px));
     }
   }
   
@@ -198,7 +198,7 @@
     box-shadow: 0 0 12px rgba(168, 85, 247, 0.5);
   }
 
-  /* Viewport height optimization for mobile */
+  /* Viewport height optimization for mobile browsers */
   @supports (-webkit-touch-callout: none) {
     .min-h-screen {
       min-height: -webkit-fill-available;
@@ -241,17 +241,18 @@
     -webkit-line-clamp: 2;
   }
 
-  /* Mini player fixed positioning across all pages */
-  .mini-player-fixed {
+  /* Mini player improved positioning for mobile browsers */
+  .mini-player-mobile-safe {
+    /* Account for browser navigation bars + app navigation + safe areas */
+    bottom: calc(10vh + 20px + env(safe-area-inset-bottom, 0px)) !important;
     position: fixed !important;
-    bottom: calc(10vh + env(safe-area-inset-bottom, 0px)) !important;
     left: 0 !important;
     right: 0 !important;
     z-index: 55 !important;
   }
 
-  /* Ensure content doesn't overlap with mini player */
+  /* Ensure content doesn't overlap with mini player on all pages */
   .page-content-mobile {
-    padding-bottom: calc(10vh + 100px + env(safe-area-inset-bottom, 16px)) !important;
+    padding-bottom: calc(10vh + 100px + 20px + env(safe-area-inset-bottom, 16px)) !important;
   }
 }
