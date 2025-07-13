@@ -76,87 +76,66 @@
     @apply bg-gradient-to-r from-purple-400 via-pink-500 to-blue-500 bg-clip-text text-transparent;
   }
   
-  /* Dynamic gradient backgrounds with better text readability */
-  .bg-app-gradient {
-    background: #0a0a0a;  /* fallback for old browsers */
+  /* Solid dark gradient background with excellent text readability */
+  .bg-solid-dark-gradient {
+    background: #0f0a1a;  /* Very dark purple fallback */
     background: linear-gradient(135deg, 
-      rgba(35, 7, 77, 0.6) 0%,     /* Purple with opacity */
-      rgba(204, 83, 51, 0.4) 50%,  /* Orange-red with opacity */
-      rgba(35, 7, 77, 0.8) 100%    /* Purple with opacity */
-    ), #0a0a0a; /* Dark base color for better text contrast */
+      #0f0a1a 0%,     /* Very dark purple */
+      #1a0d2e 25%,    /* Dark purple */
+      #2d1b3d 50%,    /* Medium dark purple */
+      #1a0d2e 75%,    /* Dark purple */
+      #0f0a1a 100%    /* Very dark purple */
+    );
   }
   
-  .bg-app-gradient-alt {
-    background: #0a0a0a;
+  /* Alternative solid dark gradient */
+  .bg-solid-dark-gradient-alt {
+    background: #0a0a0a;  /* Almost black fallback */
     background: linear-gradient(45deg,
-      rgba(35, 7, 77, 0.7) 0%,
-      rgba(204, 83, 51, 0.3) 30%,
-      rgba(35, 7, 77, 0.5) 60%,
-      rgba(204, 83, 51, 0.6) 100%
-    ), #0a0a0a;
-  }
-  
-  /* Dynamic animated gradients */
-  .bg-dynamic-gradient {
-    background: linear-gradient(270deg, 
-      rgba(35, 7, 77, 0.8), 
-      rgba(204, 83, 51, 0.6), 
-      rgba(35, 7, 77, 0.9)
-    );
-    background-size: 200% 200%;
-    animation: gradientShift 8s ease infinite;
-  }
-  
-  @keyframes gradientShift {
-    0% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-    100% {
-      background-position: 0% 50%;
-    }
-  }
-  
-  /* Futuristic background gradients with better contrast */
-  .bg-futuristic {
-    background: linear-gradient(135deg, 
-      hsl(240, 15%, 8%) 0%,     /* Darker navy for better contrast */
-      hsl(270, 25%, 12%) 25%,   /* Deep purple */
-      hsl(240, 20%, 15%) 50%,   /* Dark blue-gray */
-      hsl(280, 30%, 10%) 75%,   /* Deep purple-black */
-      hsl(220, 25%, 12%) 100%   /* Dark blue-navy */
+      #0a0a0a 0%,     /* Almost black */
+      #1a0f2e 30%,    /* Very dark blue-purple */
+      #0f0a1a 60%,    /* Very dark purple */
+      #0a0a0a 100%    /* Almost black */
     );
   }
   
-  .bg-futuristic-alt {
-    background: linear-gradient(45deg,
-      hsl(240, 20%, 6%) 0%,     /* Almost black navy */
-      hsl(260, 35%, 14%) 30%,   /* Rich purple */
-      hsl(220, 30%, 12%) 60%,   /* Deep blue */
-      hsl(280, 25%, 16%) 100%   /* Purple-gray */
-    );
-  }
-  
-  /* Text readability enhancements */
+  /* Enhanced text readability utilities */
   .text-readable {
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+    color: rgba(255, 255, 255, 0.95);
   }
   
   .text-readable-strong {
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
+    color: rgba(255, 255, 255, 0.98);
   }
   
-  /* Card backgrounds with better contrast */
+  .text-readable-header {
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    color: rgba(255, 255, 255, 0.96);
+  }
+  
+  /* Card backgrounds with better contrast against dark gradient */
   .card-glass {
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
   }
   
   .card-solid {
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Button and interactive element backgrounds */
+  .bg-interactive {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .bg-interactive:hover {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
   
   /* Ensure safe area padding for mobile */
