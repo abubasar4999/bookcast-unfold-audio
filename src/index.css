@@ -1,4 +1,3 @@
-
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 @tailwind base;
 @tailwind components;
@@ -140,7 +139,7 @@
   
   /* Ensure safe area padding for mobile - Enhanced for mini player */
   .safe-area-padding-bottom {
-    padding-bottom: max(env(safe-area-inset-bottom), 88px);
+    padding-bottom: max(env(safe-area-inset-bottom), 68px);
   }
   
   /* Hide scrollbar for webkit browsers */
@@ -155,12 +154,12 @@
   /* Ensure mobile buttons are accessible with mini player space */
   @media (max-width: 768px) {
     .mobile-safe-bottom {
-      margin-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+      margin-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
     }
     
     /* Additional padding for content to avoid mini player overlap */
     .content-safe-bottom {
-      padding-bottom: calc(168px + env(safe-area-inset-bottom, 16px)); /* Increased for both nav and mini player */
+      padding-bottom: calc(148px + env(safe-area-inset-bottom, 16px));
     }
   }
   
