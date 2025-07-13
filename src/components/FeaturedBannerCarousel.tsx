@@ -150,16 +150,16 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
                 <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent md:to-black/30" />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80" />
                 
-                {/* Content with improved positioning and spacing for pagination dots */}
-                <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-end pb-12">
-                  <div className="space-y-3 max-w-2xl">
+                {/* Content with improved positioning and increased top padding to prevent cropping */}
+                <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-end pb-10 pt-8 md:pt-12">
+                  <div className="space-y-2.5 max-w-2xl">
                     {/* Genre Badge with better contrast and smaller text */}
                     <span className="inline-block px-3 py-1.5 bg-white/20 backdrop-blur-md text-white text-xs md:text-sm font-semibold rounded-full border border-white/30 shadow-lg max-w-fit">
-                      <span className="truncate block max-w-32 md:max-w-48">{book.genre}</span>
+                      <span className="truncate block max-w-28 md:max-w-44">{book.genre}</span>
                     </span>
                     
-                    {/* Title with enhanced visibility and proper line height */}
-                    <h3 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight max-h-28 md:max-h-32 overflow-hidden drop-shadow-2xl [text-shadow:_2px_2px_8px_rgb(0_0_0_/_80%)]">
+                    {/* Title with enhanced visibility and proper line height - reduced max height to prevent overflow */}
+                    <h3 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight max-h-24 md:max-h-28 overflow-hidden drop-shadow-2xl [text-shadow:_2px_2px_8px_rgb(0_0_0_/_80%)]">
                       <span className="block leading-[1.1] line-clamp-2">
                         {book.title}
                       </span>
@@ -178,7 +178,7 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
                     )}
                     
                     {/* Action Buttons with improved styling */}
-                    <div className="flex flex-wrap gap-3 pt-3">
+                    <div className="flex flex-wrap gap-3 pt-2">
                       <Button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -209,11 +209,11 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
         </Swiper>
       </div>
 
-      {/* Enhanced Custom Styles - Reduced spacing and improved positioning */}
+      {/* Enhanced Custom Styles - Improved pagination positioning */}
       <style dangerouslySetInnerHTML={{
         __html: `
           .featured-carousel .swiper-pagination {
-            bottom: 4px !important;
+            bottom: 6px !important;
             left: 50% !important;
             transform: translateX(-50%) !important;
             width: auto !important;
