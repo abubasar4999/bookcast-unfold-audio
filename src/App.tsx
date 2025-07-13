@@ -39,7 +39,7 @@ function App() {
       <AuthProvider>
         <AudioPlayerProvider>
           <Router>
-            <div className="min-h-screen bg-app-gradient">
+            <div className="min-h-screen bg-dynamic-gradient">
               <Toaster />
               {showSplash ? (
                 <SplashScreen onComplete={() => setShowSplash(false)} />

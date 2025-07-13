@@ -76,31 +76,87 @@
     @apply bg-gradient-to-r from-purple-400 via-pink-500 to-blue-500 bg-clip-text text-transparent;
   }
   
-  /* App-wide gradient background */
+  /* Dynamic gradient backgrounds with better text readability */
   .bg-app-gradient {
-    background: #23074d;  /* fallback for old browsers */
-    background: -webkit-linear-gradient(to left, #cc5333, #23074d);  /* Chrome 10-25, Safari 5.1-6 */
-    background: linear-gradient(to left, #cc5333, #23074d); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    background: #0a0a0a;  /* fallback for old browsers */
+    background: linear-gradient(135deg, 
+      rgba(35, 7, 77, 0.6) 0%,     /* Purple with opacity */
+      rgba(204, 83, 51, 0.4) 50%,  /* Orange-red with opacity */
+      rgba(35, 7, 77, 0.8) 100%    /* Purple with opacity */
+    ), #0a0a0a; /* Dark base color for better text contrast */
   }
   
-  /* Futuristic background gradients */
+  .bg-app-gradient-alt {
+    background: #0a0a0a;
+    background: linear-gradient(45deg,
+      rgba(35, 7, 77, 0.7) 0%,
+      rgba(204, 83, 51, 0.3) 30%,
+      rgba(35, 7, 77, 0.5) 60%,
+      rgba(204, 83, 51, 0.6) 100%
+    ), #0a0a0a;
+  }
+  
+  /* Dynamic animated gradients */
+  .bg-dynamic-gradient {
+    background: linear-gradient(270deg, 
+      rgba(35, 7, 77, 0.8), 
+      rgba(204, 83, 51, 0.6), 
+      rgba(35, 7, 77, 0.9)
+    );
+    background-size: 200% 200%;
+    animation: gradientShift 8s ease infinite;
+  }
+  
+  @keyframes gradientShift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  
+  /* Futuristic background gradients with better contrast */
   .bg-futuristic {
     background: linear-gradient(135deg, 
-      hsl(240, 15%, 5%) 0%,     /* Very dark navy */
-      hsl(270, 25%, 8%) 25%,    /* Deep purple */
-      hsl(240, 20%, 12%) 50%,   /* Dark blue-gray */
-      hsl(280, 30%, 6%) 75%,    /* Deep purple-black */
-      hsl(220, 25%, 8%) 100%    /* Dark blue-navy */
+      hsl(240, 15%, 8%) 0%,     /* Darker navy for better contrast */
+      hsl(270, 25%, 12%) 25%,   /* Deep purple */
+      hsl(240, 20%, 15%) 50%,   /* Dark blue-gray */
+      hsl(280, 30%, 10%) 75%,   /* Deep purple-black */
+      hsl(220, 25%, 12%) 100%   /* Dark blue-navy */
     );
   }
   
   .bg-futuristic-alt {
     background: linear-gradient(45deg,
-      hsl(240, 20%, 4%) 0%,     /* Almost black navy */
-      hsl(260, 35%, 10%) 30%,   /* Rich purple */
-      hsl(220, 30%, 8%) 60%,    /* Deep blue */
-      hsl(280, 25%, 12%) 100%   /* Purple-gray */
+      hsl(240, 20%, 6%) 0%,     /* Almost black navy */
+      hsl(260, 35%, 14%) 30%,   /* Rich purple */
+      hsl(220, 30%, 12%) 60%,   /* Deep blue */
+      hsl(280, 25%, 16%) 100%   /* Purple-gray */
     );
+  }
+  
+  /* Text readability enhancements */
+  .text-readable {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  }
+  
+  .text-readable-strong {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+  }
+  
+  /* Card backgrounds with better contrast */
+  .card-glass {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .card-solid {
+    background: rgba(0, 0, 0, 0.7);
   }
   
   /* Ensure safe area padding for mobile */
