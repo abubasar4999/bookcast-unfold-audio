@@ -1,8 +1,8 @@
 
 import { useState, useEffect } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Autoplay } from 'swiper/modules';
-import { Plus, ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { Pagination, Autoplay } from 'swiper/modules';
+import { Plus, Play } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,7 +12,6 @@ import { toast } from 'sonner';
 
 // Import Swiper styles
 import 'swiper/css';
-import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
 interface FeaturedBannerCarouselProps {
@@ -120,13 +119,9 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
     <div className={`w-full ${className}`}>
       <div className="relative group">
         <Swiper
-          modules={[Navigation, Pagination, Autoplay]}
+          modules={[Pagination, Autoplay]}
           spaceBetween={0}
           slidesPerView={1}
-          navigation={{
-            prevEl: '.swiper-button-prev-custom',
-            nextEl: '.swiper-button-next-custom',
-          }}
           pagination={{
             clickable: true,
             bulletClass: 'swiper-pagination-bullet-custom',
@@ -157,7 +152,7 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80" />
                 
                 {/* Content with improved positioning and contrast */}
-                <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-end">
+                <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-end pb-16">
                   <div className="space-y-4 max-w-2xl">
                     {/* Genre Badge with better contrast */}
                     <span className="inline-block px-4 py-2 bg-white/20 backdrop-blur-md text-white text-sm font-semibold rounded-full border border-white/30 shadow-lg">
@@ -211,42 +206,39 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
             </SwiperSlide>
           ))}
         </Swiper>
-
-        {/* Enhanced Custom Navigation Arrows */}
-        <button className="swiper-button-prev-custom absolute left-6 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-black/50 hover:bg-black/70 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 border border-white/20 shadow-xl">
-          <ChevronLeft size={24} />
-        </button>
-        
-        <button className="swiper-button-next-custom absolute right-6 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-black/50 hover:bg-black/70 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 border border-white/20 shadow-xl">
-          <ChevronRight size={24} />
-        </button>
       </div>
 
-      {/* Enhanced Custom Styles - Fixed circular pagination dots */}
+      {/* Enhanced Custom Styles - Fixed circular pagination dots positioned outside content area */}
       <style dangerouslySetInnerHTML={{
         __html: `
           .featured-carousel .swiper-pagination {
-            bottom: 20px !important;
+            bottom: 8px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            width: auto !important;
+            display: flex !important;
+            justify-content: center !important;
+            gap: 8px !important;
           }
           
           .swiper-pagination-bullet-custom {
-            width: 12px;
-            height: 12px;
-            background: rgba(255, 255, 255, 0.4);
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.5);
             border-radius: 50% !important;
-            margin: 0 6px;
+            margin: 0 !important;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             display: inline-block;
             opacity: 1;
           }
           
           .swiper-pagination-bullet-active-custom {
             background: white !important;
-            transform: scale(1.3);
+            transform: scale(1.2);
             border-color: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
           }
           
           .line-clamp-2 {

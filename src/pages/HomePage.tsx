@@ -37,7 +37,7 @@ const HomePage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950/20 pb-32 md:pb-24 md:pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950/20 page-content-mobile md:pb-24 md:pt-20">
       {/* Personalized Header with gradient background */}
       <div className="px-4 pt-12 md:pt-8 pb-6 relative">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-900/20 via-transparent to-blue-900/20 rounded-xl" />
