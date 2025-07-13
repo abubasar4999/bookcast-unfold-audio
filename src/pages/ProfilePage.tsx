@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { User, Edit3, Clock, Crown, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -145,7 +146,7 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-950 pt-12 pb-20">
-      <div className="px-4">
+      <div className="px-4 max-w-4xl mx-auto">
         {/* Profile Header */}
         <div className="text-center mb-8">
           <div className="relative inline-block mb-4">
@@ -202,22 +203,89 @@ const ProfilePage = () => {
         </div>
 
         {/* Stats */}
-        <div className="bg-gray-900/50 rounded-xl p-6 mb-6">
-          <h2 className="text-xl font-bold text-white mb-4">Your Stats</h2>
+        <Card className="bg-gray-900/50 border-gray-800 mb-6">
+          <CardHeader>
+            <CardTitle className="text-xl font-bold text-white">Your Stats</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center p-4 bg-gray-800/50 rounded-lg">
+                <Clock size={24} className="text-purple-400 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-white">0</p>
+                <p className="text-gray-400 text-sm">Hours Listened</p>
+              </div>
+              <div className="text-center p-4 bg-gray-800/50 rounded-lg">
+                <User size={24} className="text-purple-400 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-white">0</p>
+                <p className="text-gray-400 text-sm">Favorites</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Optimized Premium Plan Card */}
+        <Card className="bg-gradient-to-br from-purple-600/20 to-purple-800/20 border-purple-500/30 mb-6 overflow-hidden relative">
+          {/* Background accent */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-purple-400/10 to-transparent rounded-full -mr-16 -mt-16" />
           
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center p-4 bg-gray-800/50 rounded-lg">
-              <Clock size={24} className="text-purple-400 mx-auto mb-2" />
-              <p className="text-2xl font-bold text-white">0</p>
-              <p className="text-gray-400 text-sm">Hours Listened</p>
+          <CardHeader className="relative">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full">
+                  <Crown size={24} className="text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl md:text-2xl font-bold text-white">
+                    Premium Plan
+                  </CardTitle>
+                  <p className="text-purple-200 text-sm">Active Subscription</p>
+                </div>
+              </div>
             </div>
-            <div className="text-center p-4 bg-gray-800/50 rounded-lg">
-              <User size={24} className="text-purple-400 mx-auto mb-2" />
-              <p className="text-2xl font-bold text-white">0</p>
-              <p className="text-gray-400 text-sm">Favorites</p>
+          </CardHeader>
+          
+          <CardContent className="relative space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <h4 className="text-white font-semibold mb-2">Included Features:</h4>
+                <ul className="space-y-1 text-purple-100 text-sm">
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-purple-400 rounded-full" />
+                    Unlimited podcast episodes
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-purple-400 rounded-full" />
+                    Offline downloads
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-purple-400 rounded-full" />
+                    Exclusive content
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-purple-400 rounded-full" />
+                    Ad-free experience
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="flex flex-col justify-center">
+                <div className="text-center md:text-right">
+                  <p className="text-3xl font-bold text-white">$9.99</p>
+                  <p className="text-purple-200 text-sm">per month</p>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+            
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <Button className="bg-white text-purple-600 hover:bg-gray-100 font-semibold flex-1">
+                Manage Subscription
+              </Button>
+              <Button variant="outline" className="border-purple-400 text-purple-200 hover:bg-purple-600/20 flex-1">
+                View Benefits
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Account Actions */}
         <div className="space-y-3">
@@ -228,20 +296,6 @@ const ProfilePage = () => {
           >
             <LogOut size={20} className="mr-2" />
             Sign Out
-          </Button>
-        </div>
-
-        {/* Subscription */}
-        <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-6 text-white mt-6">
-          <div className="flex items-center gap-3 mb-3">
-            <Crown size={24} className="text-yellow-300" />
-            <h2 className="text-xl font-bold">Premium Plan</h2>
-          </div>
-          <p className="text-purple-100 mb-4">
-            Unlimited access to all podcast episodes, offline downloads, and exclusive content.
-          </p>
-          <Button className="bg-white text-purple-600 hover:bg-gray-100 font-semibold">
-            Manage Subscription
           </Button>
         </div>
       </div>
