@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { User, Edit3, Clock, Crown, LogOut } from 'lucide-react';
+import { User, Edit3, Clock, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -219,70 +218,6 @@ const ProfilePage = () => {
                 <p className="text-2xl font-bold text-white">0</p>
                 <p className="text-gray-400 text-sm">Favorites</p>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Optimized Premium Plan Card */}
-        <Card className="bg-gradient-to-br from-purple-600/20 to-purple-800/20 border-purple-500/30 mb-6 overflow-hidden relative">
-          {/* Background accent */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-purple-400/10 to-transparent rounded-full -mr-16 -mt-16" />
-          
-          <CardHeader className="relative">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full">
-                  <Crown size={24} className="text-white" />
-                </div>
-                <div>
-                  <CardTitle className="text-xl md:text-2xl font-bold text-white">
-                    Premium Plan
-                  </CardTitle>
-                  <p className="text-purple-200 text-sm">Active Subscription</p>
-                </div>
-              </div>
-            </div>
-          </CardHeader>
-          
-          <CardContent className="relative space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <h4 className="text-white font-semibold mb-2">Included Features:</h4>
-                <ul className="space-y-1 text-purple-100 text-sm">
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-purple-400 rounded-full" />
-                    Unlimited podcast episodes
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-purple-400 rounded-full" />
-                    Offline downloads
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-purple-400 rounded-full" />
-                    Exclusive content
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-purple-400 rounded-full" />
-                    Ad-free experience
-                  </li>
-                </ul>
-              </div>
-              
-              <div className="flex flex-col justify-center">
-                <div className="text-center md:text-right">
-                  <p className="text-3xl font-bold text-white">$9.99</p>
-                  <p className="text-purple-200 text-sm">per month</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <Button className="bg-white text-purple-600 hover:bg-gray-100 font-semibold flex-1">
-                Manage Subscription
-              </Button>
-              <Button variant="outline" className="border-purple-400 text-purple-200 hover:bg-purple-600/20 flex-1">
-                View Benefits
-              </Button>
             </div>
           </CardContent>
         </Card>
