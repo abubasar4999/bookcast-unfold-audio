@@ -160,7 +160,7 @@
     
     /* Additional padding for content to avoid mini player overlap */
     .content-safe-bottom {
-      padding-bottom: calc(88px + env(safe-area-inset-bottom, 16px));
+      padding-bottom: calc(168px + env(safe-area-inset-bottom, 16px)); /* Increased for both nav and mini player */
     }
   }
   
@@ -210,11 +210,11 @@
 
   /* Enhanced z-index layering to prevent overlaps */
   .mini-player-z {
-    z-index: 50;
+    z-index: 55;
   }
 
   .nav-z {
-    z-index: 45;
+    z-index: 60; /* Higher than mini player */
   }
   
   /* Specific z-index for cards to ensure proper stacking */

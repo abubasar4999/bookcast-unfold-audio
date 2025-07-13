@@ -43,8 +43,8 @@ const ResponsiveNavigation = () => {
         </div>
       </div>
 
-      {/* Mobile Bottom Navigation with higher z-index */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-lg border-t border-gray-800 px-4 py-2 z-50 safe-area-padding-bottom">
+      {/* Mobile Bottom Navigation - Higher z-index than mini player */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-lg border-t border-gray-800 px-4 py-2 z-[60] safe-area-padding-bottom">
         <div className="flex justify-around items-center max-w-md mx-auto">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
@@ -62,6 +62,9 @@ const ResponsiveNavigation = () => {
               >
                 <Icon size={24} />
                 <span className="text-xs font-medium mt-1">{item.label}</span>
+                {isActive && (
+                  <div className="w-1 h-1 bg-purple-400 rounded-full mt-1" />
+                )}
               </button>
             );
           })}
