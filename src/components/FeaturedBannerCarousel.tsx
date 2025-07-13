@@ -151,17 +151,19 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
                 <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent md:to-black/30" />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80" />
                 
-                {/* Content with improved positioning and contrast */}
-                <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-end pb-16">
+                {/* Content with improved positioning and spacing for pagination dots */}
+                <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-end pb-12">
                   <div className="space-y-4 max-w-2xl">
                     {/* Genre Badge with better contrast */}
                     <span className="inline-block px-4 py-2 bg-white/20 backdrop-blur-md text-white text-sm font-semibold rounded-full border border-white/30 shadow-lg">
                       {book.genre}
                     </span>
                     
-                    {/* Title with enhanced visibility */}
-                    <h3 className="text-3xl md:text-5xl font-bold text-white leading-tight line-clamp-2 drop-shadow-2xl [text-shadow:_2px_2px_8px_rgb(0_0_0_/_80%)]">
-                      {book.title}
+                    {/* Title with enhanced visibility and proper line height */}
+                    <h3 className="text-3xl md:text-5xl font-bold text-white leading-tight max-h-32 overflow-hidden drop-shadow-2xl [text-shadow:_2px_2px_8px_rgb(0_0_0_/_80%)]">
+                      <span className="block leading-[1.1] line-clamp-2">
+                        {book.title}
+                      </span>
                     </h3>
                     
                     {/* Author with better contrast */}
@@ -208,37 +210,37 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
         </Swiper>
       </div>
 
-      {/* Enhanced Custom Styles - Fixed circular pagination dots positioned outside content area */}
+      {/* Enhanced Custom Styles - Reduced spacing and improved positioning */}
       <style dangerouslySetInnerHTML={{
         __html: `
           .featured-carousel .swiper-pagination {
-            bottom: 8px !important;
+            bottom: 4px !important;
             left: 50% !important;
             transform: translateX(-50%) !important;
             width: auto !important;
             display: flex !important;
             justify-content: center !important;
-            gap: 8px !important;
+            gap: 6px !important;
           }
           
           .swiper-pagination-bullet-custom {
-            width: 10px;
-            height: 10px;
-            background: rgba(255, 255, 255, 0.5);
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.4);
             border-radius: 50% !important;
             margin: 0 !important;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             display: inline-block;
             opacity: 1;
           }
           
           .swiper-pagination-bullet-active-custom {
             background: white !important;
-            transform: scale(1.2);
+            transform: scale(1.3);
             border-color: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+            box-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
           }
           
           .line-clamp-2 {
@@ -246,6 +248,7 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            text-overflow: ellipsis;
           }
           
           .scrollbar-hide {
