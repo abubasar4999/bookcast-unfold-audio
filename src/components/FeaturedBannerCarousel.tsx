@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay } from 'swiper/modules';
@@ -153,21 +152,21 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
                 
                 {/* Content with improved positioning and spacing for pagination dots */}
                 <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-end pb-12">
-                  <div className="space-y-4 max-w-2xl">
-                    {/* Genre Badge with better contrast */}
-                    <span className="inline-block px-4 py-2 bg-white/20 backdrop-blur-md text-white text-sm font-semibold rounded-full border border-white/30 shadow-lg">
-                      {book.genre}
+                  <div className="space-y-3 max-w-2xl">
+                    {/* Genre Badge with better contrast and smaller text */}
+                    <span className="inline-block px-3 py-1.5 bg-white/20 backdrop-blur-md text-white text-xs md:text-sm font-semibold rounded-full border border-white/30 shadow-lg max-w-fit">
+                      <span className="truncate block max-w-32 md:max-w-48">{book.genre}</span>
                     </span>
                     
                     {/* Title with enhanced visibility and proper line height */}
-                    <h3 className="text-3xl md:text-5xl font-bold text-white leading-tight max-h-32 overflow-hidden drop-shadow-2xl [text-shadow:_2px_2px_8px_rgb(0_0_0_/_80%)]">
+                    <h3 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight max-h-28 md:max-h-32 overflow-hidden drop-shadow-2xl [text-shadow:_2px_2px_8px_rgb(0_0_0_/_80%)]">
                       <span className="block leading-[1.1] line-clamp-2">
                         {book.title}
                       </span>
                     </h3>
                     
                     {/* Author with better contrast */}
-                    <p className="text-gray-100 text-lg md:text-xl font-medium drop-shadow-lg [text-shadow:_1px_1px_4px_rgb(0_0_0_/_60%)]">
+                    <p className="text-gray-100 text-base md:text-lg lg:text-xl font-medium drop-shadow-lg [text-shadow:_1px_1px_4px_rgb(0_0_0_/_60%)]">
                       by {book.author}
                     </p>
                     
@@ -179,15 +178,15 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
                     )}
                     
                     {/* Action Buttons with improved styling */}
-                    <div className="flex flex-wrap gap-3 pt-4">
+                    <div className="flex flex-wrap gap-3 pt-3">
                       <Button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleStartListening(book.id);
                         }}
-                        className="bg-white text-black hover:bg-gray-100 font-bold px-8 py-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-2xl border-2 border-white/20 backdrop-blur-sm text-base md:text-lg"
+                        className="bg-white text-black hover:bg-gray-100 font-bold px-6 md:px-8 py-3 md:py-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-2xl border-2 border-white/20 backdrop-blur-sm text-sm md:text-base lg:text-lg"
                       >
-                        <Play size={20} className="mr-3 fill-current" />
+                        <Play size={16} className="mr-2 md:mr-3 fill-current" />
                         Start Listening
                       </Button>
                       
@@ -197,7 +196,7 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
                           handleAddToLibrary(book);
                         }}
                         variant="outline"
-                        className="bg-black/40 text-white border-white/40 hover:bg-black/60 hover:border-white/60 hover:text-white font-semibold px-6 py-4 rounded-full transition-all duration-300 transform hover:scale-105 backdrop-blur-md shadow-xl text-base md:text-lg"
+                        className="bg-black/40 text-white border-white/40 hover:bg-black/60 hover:border-white/60 hover:text-white font-semibold px-4 md:px-6 py-3 md:py-4 rounded-full transition-all duration-300 transform hover:scale-105 backdrop-blur-md shadow-xl text-sm md:text-base lg:text-lg"
                       >
                         Add to Library
                       </Button>
