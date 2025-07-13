@@ -63,7 +63,7 @@ const MiniPlayer: React.FC = () => {
     <div 
       className="fixed left-0 right-0 z-50" 
       style={{ 
-        bottom: 'calc(10vh + 20px + env(safe-area-inset-bottom, 0px))'
+        bottom: 'calc(10vh + env(safe-area-inset-bottom, 0px))'
       }}
     >
       <div 
