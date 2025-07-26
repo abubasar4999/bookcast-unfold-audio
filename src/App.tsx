@@ -29,6 +29,8 @@ import InviteAdmins from '@/pages/admin/InviteAdmins';
 import NotificationPage from '@/pages/admin/NotificationPage';
 import InsightsPage from '@/pages/admin/InsightsPage';
 import AdminPrivacyPolicyPage from '@/pages/admin/AdminPrivacyPolicyPage';
+import TermsOfServicePage from '@/pages/TermsOfServicePage';
+import AdminTermsOfServicePage from '@/pages/admin/AdminTermsOfServicePage';
 
 const queryClient = new QueryClient();
 
@@ -55,7 +57,8 @@ function App() {
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/player/:id" element={<PlayerPage />} />
                     <Route path="/book/:id" element={<BookDetailPage />} />
-                    <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms-of-service" element={<TermsOfServicePage />} />
                     
                     {/* Admin routes */}
                     <Route path="/admin/login" element={<AdminLogin />} />
@@ -72,7 +75,8 @@ function App() {
                       <Route path="invite-admins" element={<InviteAdmins />} />
                       <Route path="notifications" element={<NotificationPage />} />
                       <Route path="insights" element={<InsightsPage />} />
-                      <Route path="privacy-policy" element={<AdminPrivacyPolicyPage />} />
+                <Route path="privacy-policy" element={<AdminPrivacyPolicyPage />} />
+                <Route path="terms-of-service" element={<AdminTermsOfServicePage />} />
                     </Route>
                   </Routes>
                   

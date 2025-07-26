@@ -173,6 +173,17 @@ const ProfilePage = () => {
                   <Shield size={20} className="mr-3" />
                   Privacy Policy
                 </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-white hover:bg-gray-800 h-12"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    navigate('/terms-of-service');
+                  }}
+                >
+                  <Shield size={20} className="mr-3" />
+                  Terms of Service
+                </Button>
               </div>
             </SheetContent>
           </Sheet>

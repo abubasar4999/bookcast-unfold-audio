@@ -97,6 +97,13 @@ const HomePage = () => {
               Privacy Policy
             </button>
             <span>•</span>
+            <button
+              onClick={() => navigate('/terms-of-service')}
+              className="hover:text-white transition-colors"
+            >
+              Terms of Service
+            </button>
+            <span>•</span>
             <span>© 2024 AudioBooks. All rights reserved.</span>
           </div>
         </div>

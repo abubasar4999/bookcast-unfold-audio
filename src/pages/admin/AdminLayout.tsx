@@ -26,6 +26,7 @@ const sidebarItems = [
   { icon: Bell, label: 'Notifications', path: '/admin/notifications' },
   { icon: BarChart3, label: 'Insights', path: '/admin/insights' },
   { icon: Shield, label: 'Privacy Policy', path: '/admin/privacy-policy' },
+  { icon: Shield, label: 'Terms of Service', path: '/admin/terms-of-service' },
   { icon: Settings, label: 'Settings', path: '/admin/settings' },
 ];
 

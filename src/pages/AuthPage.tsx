@@ -198,13 +198,20 @@ const AuthPage = () => {
               </button>
             </p>
             
-            {/* Privacy Policy Link */}
-            <div className="mt-4">
+            {/* Footer Links */}
+            <div className="mt-4 flex justify-center space-x-4">
               <button
                 onClick={() => navigate('/privacy-policy')}
                 className="text-gray-500 hover:text-gray-400 text-sm underline"
               >
                 Privacy Policy
+              </button>
+              <span className="text-gray-500 text-sm">•</span>
+              <button
+                onClick={() => navigate('/terms-of-service')}
+                className="text-gray-500 hover:text-gray-400 text-sm underline"
+              >
+                Terms of Service
               </button>
             </div>
           </div>

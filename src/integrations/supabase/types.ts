@@ -341,6 +341,30 @@ export type Database = {
         }
         Relationships: []
       }
+      terms_of_service: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       user_genre_preferences: {
         Row: {
           created_at: string
