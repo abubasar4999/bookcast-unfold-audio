@@ -22,6 +22,7 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [formData, setFormData] = useState({
     full_name: '',
@@ -150,7 +151,7 @@ const ProfilePage = () => {
         {/* Header with hamburger menu */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-white">Profile</h1>
-          <Drawer>
+          <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
             <DrawerTrigger asChild>
               <Button variant="ghost" size="sm" className="text-white hover:bg-gray-800">
                 <Menu size={24} />
@@ -164,7 +165,10 @@ const ProfilePage = () => {
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-white hover:bg-gray-800"
-                  onClick={() => navigate('/privacy-policy')}
+                  onClick={() => {
+                    setIsDrawerOpen(false);
+                    navigate('/privacy-policy');
+                  }}
                 >
                   <Shield size={20} className="mr-3" />
                   Privacy Policy
