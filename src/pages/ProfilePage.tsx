@@ -137,7 +137,7 @@ const ProfilePage = () => {
   return <div className="min-h-screen bg-gray-950 pt-12 pb-20">
       <div className="px-4 max-w-4xl mx-auto">
         {/* Header with hamburger menu for mobile */}
-        <div className="flex justify-between items-center mb-8 py-[36px]">
+        <div className="flex justify-between items-center mb-8 py-0">
           <h1 className="text-2xl font-bold text-white mx-[8px]">Profile</h1>
           
           {/* Mobile hamburger menu */}
