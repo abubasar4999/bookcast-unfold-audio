@@ -28,6 +28,7 @@ import UserDataPage from '@/pages/admin/UserDataPage';
 import InviteAdmins from '@/pages/admin/InviteAdmins';
 import NotificationPage from '@/pages/admin/NotificationPage';
 import InsightsPage from '@/pages/admin/InsightsPage';
+import AdminPrivacyPolicyPage from '@/pages/admin/AdminPrivacyPolicyPage';
 
 const queryClient = new QueryClient();
 
@@ -71,6 +72,7 @@ function App() {
                       <Route path="invite-admins" element={<InviteAdmins />} />
                       <Route path="notifications" element={<NotificationPage />} />
                       <Route path="insights" element={<InsightsPage />} />
+                      <Route path="privacy-policy" element={<AdminPrivacyPolicyPage />} />
                     </Route>
                   </Routes>
                   

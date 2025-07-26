@@ -12,7 +12,8 @@ import {
   BookOpen,
   UserPlus,
   Upload,
-  Settings
+  Settings,
+  Shield
 } from 'lucide-react';
 
 const sidebarItems = [
@@ -24,6 +25,7 @@ const sidebarItems = [
   { icon: Plus, label: 'Add New Book', path: '/admin/add-book' },
   { icon: Bell, label: 'Notifications', path: '/admin/notifications' },
   { icon: BarChart3, label: 'Insights', path: '/admin/insights' },
+  { icon: Shield, label: 'Privacy Policy', path: '/admin/privacy-policy' },
   { icon: Settings, label: 'Settings', path: '/admin/settings' },
 ];
 
