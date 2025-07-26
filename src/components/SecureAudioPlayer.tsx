@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Play, Pause, ChevronDown, Smartphone } from 'lucide-react';
+import { Play, Pause, ChevronDown, Smartphone, RotateCcw, RotateCw } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 import {
@@ -70,29 +70,21 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
     <button 
       onClick={onClick}
       disabled={disabled}
-      className="relative w-10 h-10 sm:w-12 sm:h-12 bg-gray-800/60 hover:bg-gray-700/80 rounded-full flex items-center justify-center transition-all duration-200 border border-gray-600/30 hover:border-purple-500/50 group disabled:opacity-50"
+      className="relative w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-gray-800/80 to-gray-900/90 hover:from-gray-700/90 hover:to-gray-800 rounded-full flex items-center justify-center transition-all duration-300 border border-gray-600/40 hover:border-purple-400/60 group disabled:opacity-50 hover:scale-105 shadow-lg hover:shadow-xl active:scale-95"
     >
-      <div className="relative flex items-center justify-center">
-        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div className="relative z-10 flex items-center">
-          {direction === 'backward' ? (
-            <div className="flex items-center text-white text-[10px] sm:text-xs font-bold">
-              <span className="mr-0.5 sm:mr-1">10</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="sm:w-4 sm:h-4">
-                <path d="M12 2l-7 7 7 7"/>
-                <path d="M21 9H9"/>
-              </svg>
-            </div>
-          ) : (
-            <div className="flex items-center text-white text-[10px] sm:text-xs font-bold">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="sm:w-4 sm:h-4">
-                <path d="M3 9h12"/>
-                <path d="M12 2l7 7-7 7"/>
-              </svg>
-              <span className="ml-0.5 sm:ml-1">10</span>
-            </div>
-          )}
-        </div>
+      <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="relative z-10 flex flex-col items-center justify-center">
+        {direction === 'backward' ? (
+          <>
+            <RotateCcw size={18} className="text-white group-hover:text-purple-300 transition-colors duration-200 sm:w-5 sm:h-5" />
+            <span className="text-[10px] sm:text-xs font-bold text-white group-hover:text-purple-300 transition-colors duration-200 -mt-0.5">10s</span>
+          </>
+        ) : (
+          <>
+            <RotateCw size={18} className="text-white group-hover:text-purple-300 transition-colors duration-200 sm:w-5 sm:h-5" />
+            <span className="text-[10px] sm:text-xs font-bold text-white group-hover:text-purple-300 transition-colors duration-200 -mt-0.5">10s</span>
+          </>
+        )}
       </div>
     </button>
   );
