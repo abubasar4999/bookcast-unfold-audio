@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Play, Plus, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,6 +23,7 @@ interface NetflixBookCardProps {
 const NetflixBookCard = ({ book, size = 'medium' }: NetflixBookCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [isLiking, setIsLiking] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -32,6 +33,28 @@ const NetflixBookCard = ({ book, size = 'medium' }: NetflixBookCardProps) => {
     medium: 'w-40 h-56',
     large: 'w-48 h-64'
   };
+
+  // Check if book is already liked when component mounts or user changes
+  useEffect(() => {
+    const checkLikedStatus = async () => {
+      if (!user || !book.id) return;
+
+      try {
+        const { data } = await supabase
+          .from('book_likes')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('book_id', book.id)
+          .maybeSingle();
+
+        setIsLiked(!!data);
+      } catch (error) {
+        console.error('Error checking liked status:', error);
+      }
+    };
+
+    checkLikedStatus();
+  }, [user, book.id]);
 
   const handlePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -44,40 +67,60 @@ const NetflixBookCard = ({ book, size = 'medium' }: NetflixBookCardProps) => {
 
   const handleAddToLibrary = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    
     if (!user) {
       setShowAuthDialog(true);
       return;
     }
 
+    if (isLiking) return; // Prevent double clicks
+
+    setIsLiking(true);
+
     try {
-      const { data: existing } = await supabase
-        .from('book_likes')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('book_id', book.id)
-        .maybeSingle();
+      if (isLiked) {
+        // Remove from library
+        const { error } = await supabase
+          .from('book_likes')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('book_id', book.id);
 
-      if (existing) {
-        toast.info('Book is already in your library');
-        return;
+        if (error) {
+          toast.error('Failed to remove book from library');
+          return;
+        }
+
+        setIsLiked(false);
+        toast.success('Book removed from your library');
+      } else {
+        // Add to library
+        const { error } = await supabase
+          .from('book_likes')
+          .insert({
+            user_id: user.id,
+            book_id: book.id
+          });
+
+        if (error) {
+          if (error.code === '23505') {
+            // Duplicate key error - book already liked
+            setIsLiked(true);
+            toast.info('Book is already in your library');
+          } else {
+            toast.error('Failed to add book to library');
+          }
+          return;
+        }
+
+        setIsLiked(true);
+        toast.success('Book added to your library!');
       }
-
-      const { error } = await supabase
-        .from('book_likes')
-        .insert({
-          user_id: user.id,
-          book_id: book.id
-        });
-
-      if (error) {
-        toast.error('Failed to add book to library');
-        return;
-      }
-
-      setIsLiked(true);
-      toast.success('Book added to your library!');
     } catch (error) {
+      console.error('Error updating library:', error);
       toast.error('Something went wrong');
+    } finally {
+      setIsLiking(false);
     }
   };
 
@@ -120,9 +163,20 @@ const NetflixBookCard = ({ book, size = 'medium' }: NetflixBookCardProps) => {
               </button>
               <button
                 onClick={handleAddToLibrary}
-                className="w-12 h-12 bg-gray-800/80 rounded-full flex items-center justify-center text-white hover:bg-gray-700/80 transition-colors shadow-lg transform hover:scale-110 backdrop-blur-sm border border-white/20"
+                disabled={isLiking}
+                className={`w-12 h-12 rounded-full flex items-center justify-center text-white transition-all shadow-lg transform hover:scale-110 backdrop-blur-sm border border-white/20 ${
+                  isLiked 
+                    ? 'bg-red-600/90 hover:bg-red-500/90 animate-pulse' 
+                    : 'bg-gray-800/80 hover:bg-gray-700/80'
+                } ${isLiking ? 'scale-95 opacity-75' : ''}`}
               >
-                {isLiked ? <Heart size={20} className="fill-current text-red-500" /> : <Plus size={20} />}
+                {isLiking ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                ) : isLiked ? (
+                  <Heart size={20} className="fill-current text-white animate-in zoom-in-50 duration-200" />
+                ) : (
+                  <Plus size={20} />
+                )}
               </button>
             </div>
           </div>
@@ -140,6 +194,9 @@ const NetflixBookCard = ({ book, size = 'medium' }: NetflixBookCardProps) => {
             <span className="text-xs text-purple-400 bg-purple-500/20 px-2 py-0.5 rounded-full">
               {book.genre}
             </span>
+            {isLiked && (
+              <Heart size={12} className="text-red-400 fill-current" />
+            )}
           </div>
         </div>
       </div>
@@ -150,7 +207,7 @@ const NetflixBookCard = ({ book, size = 'medium' }: NetflixBookCardProps) => {
           <DialogHeader>
             <DialogTitle className="text-center">Sign In Required</DialogTitle>
             <DialogDescription className="text-center">
-              Please sign in to start listening to audiobooks and access your library.
+              Please sign in to start listening to audiobooks and save books to your library.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-3 mt-4">
