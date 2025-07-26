@@ -5,7 +5,7 @@ import BookCard from '../components/BookCard';
 import AuthorCard from '../components/AuthorCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useSearchBooks, useAuthors, useBooks, useTrendingBooks } from '@/hooks/useBooks';
+import { useSearchBooks, useAuthors, useBooks, useTrendingBooks, useGuests } from '@/hooks/useBooks';
 import { useNavigate } from 'react-router-dom';
 
 const SearchPage = () => {
@@ -17,6 +17,7 @@ const SearchPage = () => {
   const { data: authors = [], isLoading: isLoadingAuthors } = useAuthors();
   const { data: allBooks = [], isLoading: isLoadingBooks } = useBooks();
   const { data: trendingBooks = [], isLoading: isLoadingTrending } = useTrendingBooks();
+  const { data: guests = [], isLoading: isLoadingGuests } = useGuests();
   const navigate = useNavigate();
 
   // Genre data with app's color theme
@@ -43,8 +44,12 @@ const SearchPage = () => {
     navigate(`/book/${bookId}`);
   };
 
-  // Get trending authors
-  const trendingAuthors = authors.slice(0, showAllTrendingGuests ? authors.length : 4);
+  const handleGuestClick = (guestId: string) => {
+    navigate(`/guest/${guestId}`);
+  };
+
+  // Get trending guests (characters from books)
+  const trendingGuests = guests.slice(0, showAllTrendingGuests ? guests.length : 4);
   
   // Get popular authors with mock data - show only 4 initially
   const popularAuthors = authors.slice(0, showAllMostLiked ? authors.length : 4).map((author, index) => ({
@@ -95,7 +100,7 @@ const SearchPage = () => {
             </div>
           </div>
 
-          {/* Trending Authors */}
+          {/* Trending Guests */}
           <div className="px-4 mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white text-readable">Trending Guest</h2>
@@ -107,7 +112,7 @@ const SearchPage = () => {
                 {showAllTrendingGuests ? 'Show Less' : 'See all'}
               </Button>
             </div>
-            {isLoadingAuthors ? (
+            {isLoadingGuests ? (
               <div className="flex gap-4 overflow-x-auto pb-4">
                 {[...Array(4)].map((_, i) => (
                   <div key={i} className="w-20 h-20 bg-gray-800/50 rounded-full animate-pulse flex-shrink-0" />
@@ -115,7 +120,52 @@ const SearchPage = () => {
               </div>
             ) : (
               <div className={`${showAllTrendingGuests ? 'grid grid-cols-4 md:grid-cols-8 gap-4' : 'flex gap-4 overflow-x-auto pb-4 scrollbar-hide'}`}>
-                {trendingAuthors.map((author) => (
+                {trendingGuests.map((guest) => (
+                  <div
+                    key={guest.id}
+                    onClick={() => handleGuestClick(guest.id)}
+                    className="flex-shrink-0 text-center cursor-pointer group"
+                  >
+                    <div className="relative mb-2">
+                      <img
+                        src={guest.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'}
+                        alt={guest.name}
+                        className="w-20 h-20 rounded-full object-cover group-hover:opacity-80 transition-opacity"
+                      />
+                      <div className="absolute bottom-0 right-0 w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center">
+                        <TrendingUp size={12} className="text-white" />
+                      </div>
+                    </div>
+                    <p className="text-white text-sm font-medium line-clamp-2 max-w-[80px] text-readable">
+                      {guest.name}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Trending Authors */}
+          <div className="px-4 mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-white text-readable">Trending Authors</h2>
+              <Button
+                variant="ghost"
+                onClick={() => setShowAllMostLiked(!showAllMostLiked)}
+                className="text-purple-400 hover:text-purple-300 text-sm font-medium hover:bg-purple-500/10"
+              >
+                {showAllMostLiked ? 'Show Less' : 'See all'}
+              </Button>
+            </div>
+            {isLoadingAuthors ? (
+              <div className="flex gap-4 overflow-x-auto pb-4">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="w-20 h-20 bg-gray-800/50 rounded-full animate-pulse flex-shrink-0" />
+                ))}
+              </div>
+            ) : (
+              <div className={`${showAllMostLiked ? 'grid grid-cols-4 md:grid-cols-8 gap-4' : 'flex gap-4 overflow-x-auto pb-4 scrollbar-hide'}`}>
+                {authors.slice(0, showAllMostLiked ? authors.length : 4).map((author) => (
                   <div
                     key={author.id}
                     onClick={() => handleAuthorClick(author.id)}
@@ -127,7 +177,7 @@ const SearchPage = () => {
                         alt={author.name}
                         className="w-20 h-20 rounded-full object-cover group-hover:opacity-80 transition-opacity"
                       />
-                      <div className="absolute bottom-0 right-0 w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center">
+                      <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
                         <TrendingUp size={12} className="text-white" />
                       </div>
                     </div>

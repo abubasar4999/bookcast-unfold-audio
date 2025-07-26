@@ -137,6 +137,7 @@ export type Database = {
           description: string | null
           duration: string | null
           genre: string
+          guest_id: string | null
           id: string
           is_trending: boolean | null
           popularity_score: number | null
@@ -153,6 +154,7 @@ export type Database = {
           description?: string | null
           duration?: string | null
           genre: string
+          guest_id?: string | null
           id?: string
           is_trending?: boolean | null
           popularity_score?: number | null
@@ -169,6 +171,7 @@ export type Database = {
           description?: string | null
           duration?: string | null
           genre?: string
+          guest_id?: string | null
           id?: string
           is_trending?: boolean | null
           popularity_score?: number | null
@@ -252,6 +255,36 @@ export type Database = {
           icon?: string | null
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      guests: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          character_description: string | null
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          character_description?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          character_description?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }

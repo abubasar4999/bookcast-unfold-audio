@@ -25,6 +25,14 @@ export interface Author {
   bio: string | null;
 }
 
+export interface Guest {
+  id: string;
+  name: string;
+  avatar_url: string | null;
+  bio: string | null;
+  character_description: string | null;
+}
+
 export interface Genre {
   id: string;
   name: string;
@@ -208,6 +216,46 @@ export const useAdminBooks = () => {
         ...book,
         cover: book.cover_url,
       })) as Book[];
+    },
+  });
+};
+
+export const useGuests = () => {
+  return useQuery({
+    queryKey: ['guests'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('guests')
+        .select('*')
+        .order('name');
+      
+      if (error) {
+        console.error('Error fetching guests:', error);
+        throw error;
+      }
+      
+      return data as Guest[];
+    }
+  });
+};
+
+export const useBooksByGuest = (guestId: string) => {
+  return useQuery({
+    queryKey: ['books-by-guest', guestId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('books')
+        .select('*')
+        .eq('guest_id', guestId)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      return (data || []).map(book => ({
+        ...book,
+        cover: book.cover_url,
+      }));
     },
   });
 };

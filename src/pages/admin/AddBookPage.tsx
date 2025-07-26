@@ -11,20 +11,25 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft } from 'lucide-react';
+import { useAuthors, useGuests } from '@/hooks/useBooks';
 
 const AddBookPage = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { data: authors = [] } = useAuthors();
+  const { data: guests = [] } = useGuests();
   
   const [formData, setFormData] = useState({
     title: '',
     author: '',
+    author_id: '',
     genre: '',
     description: '',
     cover_url: '',
     audio_path: '',
-    duration: ''
+    duration: '',
+    guest_id: ''
   });
 
   const addBookMutation = useMutation({
@@ -53,11 +58,13 @@ const AddBookPage = () => {
       setFormData({
         title: '',
         author: '',
+        author_id: '',
         genre: '',
         description: '',
         cover_url: '',
         audio_path: '',
-        duration: ''
+        duration: '',
+        guest_id: ''
       });
       
       // Invalidate queries to refresh the book lists
@@ -97,11 +104,13 @@ const AddBookPage = () => {
     setFormData({
       title: '',
       author: '',
+      author_id: '',
       genre: '',
       description: '',
       cover_url: '',
       audio_path: '',
-      duration: ''
+      duration: '',
+      guest_id: ''
     });
   };
 
@@ -160,6 +169,40 @@ const AddBookPage = () => {
                   required
                   placeholder="Enter author name"
                 />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label htmlFor="author_id">Select Author (Optional)</Label>
+                <Select value={formData.author_id} onValueChange={(value) => handleInputChange('author_id', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Link to author profile" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {authors.map((author) => (
+                      <SelectItem key={author.id} value={author.id}>
+                        {author.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="guest_id">Select Guest/Character (Optional)</Label>
+                <Select value={formData.guest_id} onValueChange={(value) => handleInputChange('guest_id', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Link to guest/character" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {guests.map((guest) => (
+                      <SelectItem key={guest.id} value={guest.id}>
+                        {guest.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
