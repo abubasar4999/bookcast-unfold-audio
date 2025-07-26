@@ -198,14 +198,14 @@ const LibraryPage = () => {
           <TabsList className="grid w-full grid-cols-2 gap-3 bg-gradient-to-r from-purple-900/30 to-indigo-900/30 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-2 h-16 shadow-xl shadow-purple-500/10">
             <TabsTrigger 
               value="saved" 
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/30 data-[state=active]:border-0 data-[state=inactive]:bg-white data-[state=inactive]:text-purple-600 data-[state=inactive]:border-2 data-[state=inactive]:border-purple-500 transition-all duration-300 rounded-xl font-semibold hover:scale-105 text-sm px-4 py-2"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/30 data-[state=active]:border-0 data-[state=inactive]:bg-white data-[state=inactive]:text-gray-600 data-[state=inactive]:border-0 transition-all duration-300 rounded-xl font-semibold hover:scale-105 text-sm px-4 py-2"
             >
               <Bookmark size={16} />
               Saved ({savedBooks.length})
             </TabsTrigger>
             <TabsTrigger 
               value="liked" 
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/30 data-[state=active]:border-0 data-[state=inactive]:bg-white data-[state=inactive]:text-purple-600 data-[state=inactive]:border-2 data-[state=inactive]:border-purple-500 transition-all duration-300 rounded-xl font-semibold hover:scale-105 text-sm px-4 py-2"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/30 data-[state=active]:border-0 data-[state=inactive]:bg-white data-[state=inactive]:text-gray-600 data-[state=inactive]:border-0 transition-all duration-300 rounded-xl font-semibold hover:scale-105 text-sm px-4 py-2"
             >
               <Heart size={16} />
               Liked ({likedBooks.length})
