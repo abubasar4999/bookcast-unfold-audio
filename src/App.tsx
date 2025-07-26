@@ -11,6 +11,7 @@ import ProfilePage from '@/pages/ProfilePage';
 import AuthPage from '@/pages/AuthPage';
 import PlayerPage from '@/pages/PlayerPage';
 import BookDetailPage from '@/pages/BookDetailPage';
+import PrivacyPolicyPage from '@/pages/PrivacyPolicyPage';
 import ResponsiveNavigation from '@/components/ResponsiveNavigation';
 import { AudioPlayerProvider } from '@/contexts/AudioPlayerContext';
 import MiniPlayer from '@/components/MiniPlayer';
@@ -53,6 +54,7 @@ function App() {
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/player/:id" element={<PlayerPage />} />
                     <Route path="/book/:id" element={<BookDetailPage />} />
+                    <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                     
                     {/* Admin routes */}
                     <Route path="/admin/login" element={<AdminLogin />} />

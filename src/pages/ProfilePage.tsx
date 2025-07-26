@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { User, Edit3, Clock, LogOut } from 'lucide-react';
+import { User, Edit3, Clock, LogOut, Menu, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -146,6 +147,33 @@ const ProfilePage = () => {
   return (
     <div className="min-h-screen bg-gray-950 pt-12 pb-20">
       <div className="px-4 max-w-4xl mx-auto">
+        {/* Header with hamburger menu */}
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold text-white">Profile</h1>
+          <Drawer>
+            <DrawerTrigger asChild>
+              <Button variant="ghost" size="sm" className="text-white hover:bg-gray-800">
+                <Menu size={24} />
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent className="bg-gray-900 border-gray-700">
+              <DrawerHeader>
+                <DrawerTitle className="text-white">Menu</DrawerTitle>
+              </DrawerHeader>
+              <div className="p-4 space-y-3">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-white hover:bg-gray-800"
+                  onClick={() => navigate('/privacy-policy')}
+                >
+                  <Shield size={20} className="mr-3" />
+                  Privacy Policy
+                </Button>
+              </div>
+            </DrawerContent>
+          </Drawer>
+        </div>
+
         {/* Profile Header */}
         <div className="text-center mb-8">
           <div className="relative inline-block mb-4">
