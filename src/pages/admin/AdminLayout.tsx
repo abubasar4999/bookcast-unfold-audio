@@ -54,12 +54,10 @@ const AdminLayout = () => {
       `}>
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between">
-            {(sidebarOpen || window.innerWidth >= 1024) && (
-              <h1 className="text-xl font-bold text-foreground">BookCast Admin</h1>
-            )}
+            <h1 className="text-xl font-bold text-foreground">BookCast Admin</h1>
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-muted rounded-lg transition-colors"
+              className="p-2 hover:bg-muted rounded-lg transition-colors lg:hidden"
             >
               {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -90,9 +88,7 @@ const AdminLayout = () => {
                     title={!sidebarOpen && window.innerWidth >= 1024 ? item.label : undefined}
                   >
                     <Icon size={20} />
-                    {(sidebarOpen || window.innerWidth < 1024) && (
-                      <span className="font-medium">{item.label}</span>
-                    )}
+                    <span className="font-medium">{item.label}</span>
                   </button>
                 </li>
               );
