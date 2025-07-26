@@ -1,11 +1,13 @@
 
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import FeaturedBannerCarousel from '@/components/FeaturedBannerCarousel';
 import ContinueListeningSection from '@/components/ContinueListeningSection';
 import GenreCarousel from '@/components/GenreCarousel';
 
 const HomePage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Extract user's first name from full_name or email, or show default greeting
   const getUserGreeting = () => {
@@ -83,6 +85,22 @@ const HomePage = () => {
           </div>
         ))}
       </div>
+      
+      {/* Footer */}
+      <footer className="mt-16 pb-8 px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="flex justify-center space-x-6 text-sm text-gray-400">
+            <button
+              onClick={() => navigate('/privacy-policy')}
+              className="hover:text-white transition-colors"
+            >
+              Privacy Policy
+            </button>
+            <span>•</span>
+            <span>© 2024 AudioBooks. All rights reserved.</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

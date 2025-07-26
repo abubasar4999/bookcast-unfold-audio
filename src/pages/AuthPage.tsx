@@ -197,6 +197,16 @@ const AuthPage = () => {
                 {isSignUp ? 'Sign In' : 'Sign Up'}
               </button>
             </p>
+            
+            {/* Privacy Policy Link */}
+            <div className="mt-4">
+              <button
+                onClick={() => navigate('/privacy-policy')}
+                className="text-gray-500 hover:text-gray-400 text-sm underline"
+              >
+                Privacy Policy
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { User, Edit3, Clock, LogOut, Menu, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -22,7 +22,7 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [formData, setFormData] = useState({
     full_name: '',
@@ -151,22 +151,22 @@ const ProfilePage = () => {
         {/* Header with hamburger menu */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-white">Profile</h1>
-          <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-            <DrawerTrigger asChild>
+          <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+            <SheetTrigger asChild>
               <Button variant="ghost" size="sm" className="text-white hover:bg-gray-800">
                 <Menu size={24} />
               </Button>
-            </DrawerTrigger>
-            <DrawerContent className="bg-gray-900 border-gray-700">
-              <DrawerHeader>
-                <DrawerTitle className="text-white">Menu</DrawerTitle>
-              </DrawerHeader>
-              <div className="p-4 space-y-3">
+            </SheetTrigger>
+            <SheetContent side="right" className="bg-gray-900 border-gray-700 text-white w-80">
+              <SheetHeader>
+                <SheetTitle className="text-white">Menu</SheetTitle>
+              </SheetHeader>
+              <div className="mt-6 space-y-3">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start text-white hover:bg-gray-800"
+                  className="w-full justify-start text-white hover:bg-gray-800 h-12"
                   onClick={() => {
-                    setIsDrawerOpen(false);
+                    setIsMenuOpen(false);
                     navigate('/privacy-policy');
                   }}
                 >
@@ -174,8 +174,8 @@ const ProfilePage = () => {
                   Privacy Policy
                 </Button>
               </div>
-            </DrawerContent>
-          </Drawer>
+            </SheetContent>
+          </Sheet>
         </div>
 
         {/* Profile Header */}
