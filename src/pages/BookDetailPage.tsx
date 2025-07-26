@@ -1,11 +1,12 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowDown, Play, Heart } from 'lucide-react';
+import { ArrowDown, Play, Heart, Bookmark } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Book } from '@/hooks/useBooks';
-import { toast } from 'sonner';
+import { useLikedBooks } from '@/hooks/useLikedBooks';
+import { useSavedBooks } from '@/hooks/useSavedBooks';
 import RelatedBooksCarousel from '@/components/RelatedBooksCarousel';
 import PersonalizedRecommendations from '@/components/PersonalizedRecommendations';
 import {
@@ -23,9 +24,11 @@ const BookDetailPage = () => {
   const { user } = useAuth();
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLiked, setIsLiked] = useState(false);
-  const [isLiking, setIsLiking] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [isLiking, setIsLiking] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const { isBookLiked, toggleLike } = useLikedBooks();
+  const { isBookSaved, toggleSave } = useSavedBooks();
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -61,27 +64,8 @@ const BookDetailPage = () => {
     fetchBook();
   }, [id]);
 
-  // Check if book is already liked when component mounts or user changes
-  useEffect(() => {
-    const checkLikedStatus = async () => {
-      if (!user || !id) return;
-
-      try {
-        const { data } = await supabase
-          .from('book_likes')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('book_id', id)
-          .maybeSingle();
-
-        setIsLiked(!!data);
-      } catch (error) {
-        console.error('Error checking liked status:', error);
-      }
-    };
-
-    checkLikedStatus();
-  }, [user, id]);
+  const isBookCurrentlyLiked = id ? isBookLiked(id) : false;
+  const isBookCurrentlySaved = id ? isBookSaved(id) : false;
 
   const handleStartListening = () => {
     if (!user) {
@@ -91,60 +75,39 @@ const BookDetailPage = () => {
     navigate(`/player/${id}`);
   };
 
-  const handleSaveToLibrary = async () => {
+  const handleLikeBook = async () => {
     if (!user) {
       setShowAuthDialog(true);
       return;
     }
 
-    if (isLiking || !id) return; // Prevent double clicks
+    if (isLiking || !id) return;
 
     setIsLiking(true);
-
     try {
-      if (isLiked) {
-        // Remove from library
-        const { error } = await supabase
-          .from('book_likes')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('book_id', id);
-
-        if (error) {
-          toast.error('Failed to remove book from library');
-          return;
-        }
-
-        setIsLiked(false);
-        toast.success('Book removed from your library');
-      } else {
-        // Add to library
-        const { error } = await supabase
-          .from('book_likes')
-          .insert({
-            user_id: user.id,
-            book_id: id
-          });
-
-        if (error) {
-          if (error.code === '23505') {
-            // Duplicate key error - book already liked
-            setIsLiked(true);
-            toast.info('Book is already in your library');
-          } else {
-            toast.error('Failed to add book to library');
-          }
-          return;
-        }
-
-        setIsLiked(true);
-        toast.success('Book added to your library!');
-      }
+      await toggleLike(id);
     } catch (error) {
-      console.error('Error updating library:', error);
-      toast.error('Something went wrong');
+      // Error is already handled in the hook
     } finally {
       setIsLiking(false);
+    }
+  };
+
+  const handleSaveBook = async () => {
+    if (!user) {
+      setShowAuthDialog(true);
+      return;
+    }
+
+    if (isSaving || !id) return;
+
+    setIsSaving(true);
+    try {
+      await toggleSave(id);
+    } catch (error) {
+      // Error is already handled in the hook
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -227,10 +190,10 @@ const BookDetailPage = () => {
                 Start Listening
               </button>
               <button
-                onClick={handleSaveToLibrary}
+                onClick={handleLikeBook}
                 disabled={isLiking}
                 className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
-                  isLiked 
+                  isBookCurrentlyLiked 
                     ? 'bg-red-600 text-white hover:bg-red-500 animate-pulse' 
                     : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
                 } ${isLiking ? 'scale-95 opacity-75' : ''}`}
@@ -240,7 +203,25 @@ const BookDetailPage = () => {
                 ) : (
                   <Heart 
                     size={20} 
-                    className={`${isLiked ? 'fill-current animate-in zoom-in-50 duration-200' : ''}`} 
+                    className={`${isBookCurrentlyLiked ? 'fill-current animate-in zoom-in-50 duration-200' : ''}`} 
+                  />
+                )}
+              </button>
+              <button
+                onClick={handleSaveBook}
+                disabled={isSaving}
+                className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
+                  isBookCurrentlySaved 
+                    ? 'bg-blue-600 text-white hover:bg-blue-500 animate-pulse' 
+                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                } ${isSaving ? 'scale-95 opacity-75' : ''}`}
+              >
+                {isSaving ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
+                ) : (
+                  <Bookmark 
+                    size={20} 
+                    className={`${isBookCurrentlySaved ? 'fill-current animate-in zoom-in-50 duration-200' : ''}`} 
                   />
                 )}
               </button>
@@ -272,7 +253,8 @@ const BookDetailPage = () => {
                 <span className="text-gray-400">Status:</span>
                 <div className="flex items-center gap-2">
                   <span className="text-green-400">✓ Available</span>
-                  {isLiked && <Heart size={12} className="text-red-400 fill-current" />}
+                  {isBookCurrentlyLiked && <Heart size={12} className="text-red-400 fill-current" />}
+                  {isBookCurrentlySaved && <Bookmark size={12} className="text-blue-400 fill-current" />}
                 </div>
               </div>
             </div>

@@ -1,11 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { Play, Plus, Heart } from 'lucide-react';
+import { Play, Bookmark, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { Book } from '@/hooks/useBooks';
-import { toast } from 'sonner';
+import { useSavedBooks } from '@/hooks/useSavedBooks';
 import {
   Dialog,
   DialogContent,
@@ -22,11 +21,11 @@ interface NetflixBookCardProps {
 
 const NetflixBookCard = ({ book, size = 'medium' }: NetflixBookCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
-  const [isLiking, setIsLiking] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { isBookSaved, toggleSave } = useSavedBooks();
+  const [isSaving, setIsSaving] = useState(false);
 
   const sizeClasses = {
     small: 'w-32 h-48',
@@ -34,27 +33,7 @@ const NetflixBookCard = ({ book, size = 'medium' }: NetflixBookCardProps) => {
     large: 'w-48 h-64'
   };
 
-  // Check if book is already liked when component mounts or user changes
-  useEffect(() => {
-    const checkLikedStatus = async () => {
-      if (!user || !book.id) return;
-
-      try {
-        const { data } = await supabase
-          .from('book_likes')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('book_id', book.id)
-          .maybeSingle();
-
-        setIsLiked(!!data);
-      } catch (error) {
-        console.error('Error checking liked status:', error);
-      }
-    };
-
-    checkLikedStatus();
-  }, [user, book.id]);
+  const isBookCurrentlySaved = isBookSaved(book.id);
 
   const handlePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -65,7 +44,7 @@ const NetflixBookCard = ({ book, size = 'medium' }: NetflixBookCardProps) => {
     navigate(`/player/${book.id}`);
   };
 
-  const handleAddToLibrary = async (e: React.MouseEvent) => {
+  const handleSaveToLibrary = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
     if (!user) {
@@ -73,54 +52,16 @@ const NetflixBookCard = ({ book, size = 'medium' }: NetflixBookCardProps) => {
       return;
     }
 
-    if (isLiking) return; // Prevent double clicks
+    if (isSaving) return; // Prevent double clicks
 
-    setIsLiking(true);
+    setIsSaving(true);
 
     try {
-      if (isLiked) {
-        // Remove from library
-        const { error } = await supabase
-          .from('book_likes')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('book_id', book.id);
-
-        if (error) {
-          toast.error('Failed to remove book from library');
-          return;
-        }
-
-        setIsLiked(false);
-        toast.success('Book removed from your library');
-      } else {
-        // Add to library
-        const { error } = await supabase
-          .from('book_likes')
-          .insert({
-            user_id: user.id,
-            book_id: book.id
-          });
-
-        if (error) {
-          if (error.code === '23505') {
-            // Duplicate key error - book already liked
-            setIsLiked(true);
-            toast.info('Book is already in your library');
-          } else {
-            toast.error('Failed to add book to library');
-          }
-          return;
-        }
-
-        setIsLiked(true);
-        toast.success('Book added to your library!');
-      }
+      await toggleSave(book.id);
     } catch (error) {
-      console.error('Error updating library:', error);
-      toast.error('Something went wrong');
+      // Error is already handled in the hook
     } finally {
-      setIsLiking(false);
+      setIsSaving(false);
     }
   };
 
@@ -162,20 +103,21 @@ const NetflixBookCard = ({ book, size = 'medium' }: NetflixBookCardProps) => {
                 <Play size={20} className="fill-current ml-0.5" />
               </button>
               <button
-                onClick={handleAddToLibrary}
-                disabled={isLiking}
+                onClick={handleSaveToLibrary}
+                disabled={isSaving}
                 className={`w-12 h-12 rounded-full flex items-center justify-center text-white transition-all shadow-lg transform hover:scale-110 backdrop-blur-sm border border-white/20 ${
-                  isLiked 
-                    ? 'bg-red-600/90 hover:bg-red-500/90 animate-pulse' 
+                  isBookCurrentlySaved 
+                    ? 'bg-blue-600/90 hover:bg-blue-500/90 animate-pulse' 
                     : 'bg-gray-800/80 hover:bg-gray-700/80'
-                } ${isLiking ? 'scale-95 opacity-75' : ''}`}
+                } ${isSaving ? 'scale-95 opacity-75' : ''}`}
               >
-                {isLiking ? (
+                {isSaving ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                ) : isLiked ? (
-                  <Heart size={20} className="fill-current text-white animate-in zoom-in-50 duration-200" />
                 ) : (
-                  <Plus size={20} />
+                  <Bookmark 
+                    size={20} 
+                    className={`${isBookCurrentlySaved ? 'fill-current animate-in zoom-in-50 duration-200' : ''}`} 
+                  />
                 )}
               </button>
             </div>
@@ -194,8 +136,8 @@ const NetflixBookCard = ({ book, size = 'medium' }: NetflixBookCardProps) => {
             <span className="text-xs text-purple-400 bg-purple-500/20 px-2 py-0.5 rounded-full">
               {book.genre}
             </span>
-            {isLiked && (
-              <Heart size={12} className="text-red-400 fill-current" />
+            {isBookCurrentlySaved && (
+              <Bookmark size={12} className="text-blue-400 fill-current" />
             )}
           </div>
         </div>
