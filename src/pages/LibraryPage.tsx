@@ -198,14 +198,14 @@ const LibraryPage = () => {
           <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-purple-900/30 to-indigo-900/30 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-1.5 h-16 shadow-xl shadow-purple-500/10">
             <TabsTrigger 
               value="saved" 
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/30 data-[state=active]:border data-[state=active]:border-purple-400/50 data-[state=inactive]:text-purple-300 data-[state=inactive]:opacity-70 transition-all duration-300 rounded-xl font-semibold hover:opacity-100 hover:text-purple-200 text-sm px-4 py-2"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/30 data-[state=active]:border data-[state=active]:border-purple-400/50 data-[state=inactive]:bg-purple-800/20 data-[state=inactive]:text-purple-200 data-[state=inactive]:border data-[state=inactive]:border-purple-500/30 transition-all duration-300 rounded-xl font-semibold hover:bg-purple-700/30 hover:text-white text-sm px-4 py-2"
             >
               <Bookmark size={16} />
               Saved ({savedBooks.length})
             </TabsTrigger>
             <TabsTrigger 
               value="liked" 
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/30 data-[state=active]:border data-[state=active]:border-purple-400/50 data-[state=inactive]:text-purple-300 data-[state=inactive]:opacity-70 transition-all duration-300 rounded-xl font-semibold hover:opacity-100 hover:text-purple-200 text-sm px-4 py-2"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/30 data-[state=active]:border data-[state=active]:border-purple-400/50 data-[state=inactive]:bg-purple-800/20 data-[state=inactive]:text-purple-200 data-[state=inactive]:border data-[state=inactive]:border-purple-500/30 transition-all duration-300 rounded-xl font-semibold hover:bg-purple-700/30 hover:text-white text-sm px-4 py-2"
             >
               <Heart size={16} />
               Liked ({likedBooks.length})
