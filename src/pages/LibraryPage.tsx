@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { Play, Heart, Bookmark, X } from 'lucide-react';
+import { Play, Heart, Bookmark, X, Trash2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useLikedBooks } from '@/hooks/useLikedBooks';
@@ -131,7 +131,7 @@ const LibraryPage = () => {
         {books.map((book) => (
           <div 
             key={book.id} 
-            className="relative overflow-hidden"
+            className="relative overflow-hidden group"
             onTouchStart={(e) => handleTouchStart(e, book.id)}
             onClick={() => swipedBook === book.id && setSwipedBook(null)}
           >
@@ -150,19 +150,32 @@ const LibraryPage = () => {
                 <p className="text-gray-400 text-sm truncate">{book.author}</p>
                 <p className="text-gray-500 text-xs">{book.duration}</p>
               </div>
+              
+              {/* Desktop delete button - visible on hover */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveBook(book.id, type);
+                }}
+                className="hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-red-500/80 hover:bg-red-500 transition-all duration-200 opacity-0 group-hover:opacity-100 mr-2"
+                title="Remove from library"
+              >
+                <Trash2 size={16} className="text-white" />
+              </button>
+              
               <button 
                 onClick={() => handlePlay(book.id)}
-                className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors ml-4"
+                className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
               >
                 <Play size={20} className="text-black ml-1" />
               </button>
             </div>
             
-            {/* Delete button that appears when swiped */}
+            {/* Mobile delete button that appears when swiped */}
             {swipedBook === book.id && (
               <button
                 onClick={() => handleRemoveBook(book.id, type)}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors animate-fade-in"
+                className="md:hidden absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors animate-fade-in"
               >
                 <X size={20} className="text-white" />
               </button>
@@ -182,17 +195,17 @@ const LibraryPage = () => {
 
       <div className="px-4">
         <Tabs defaultValue="saved" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-gray-900/50 to-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-1 h-14">
+          <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-purple-900/30 to-indigo-900/30 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-1.5 h-16 shadow-xl shadow-purple-500/10">
             <TabsTrigger 
               value="saved" 
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/90 data-[state=active]:to-primary-foreground/90 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 data-[state=inactive]:text-gray-400 data-[state=inactive]:opacity-60 transition-all duration-300 rounded-xl font-semibold hover:opacity-100"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/30 data-[state=active]:border data-[state=active]:border-purple-400/50 data-[state=inactive]:text-purple-300 data-[state=inactive]:opacity-70 transition-all duration-300 rounded-xl font-semibold hover:opacity-100 hover:text-purple-200 text-sm px-4 py-2"
             >
               <Bookmark size={16} />
               Saved ({savedBooks.length})
             </TabsTrigger>
             <TabsTrigger 
               value="liked" 
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/90 data-[state=active]:to-primary-foreground/90 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 data-[state=inactive]:text-gray-400 data-[state=inactive]:opacity-60 transition-all duration-300 rounded-xl font-semibold hover:opacity-100"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/30 data-[state=active]:border data-[state=active]:border-purple-400/50 data-[state=inactive]:text-purple-300 data-[state=inactive]:opacity-70 transition-all duration-300 rounded-xl font-semibold hover:opacity-100 hover:text-purple-200 text-sm px-4 py-2"
             >
               <Heart size={16} />
               Liked ({likedBooks.length})
