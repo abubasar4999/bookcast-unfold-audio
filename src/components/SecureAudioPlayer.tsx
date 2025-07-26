@@ -73,17 +73,17 @@ const SecureAudioPlayer: React.FC<SecureAudioPlayerProps> = ({
       className="relative w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-gray-800/80 to-gray-900/90 hover:from-gray-700/90 hover:to-gray-800 rounded-full flex items-center justify-center transition-all duration-300 border border-gray-600/40 hover:border-purple-400/60 group disabled:opacity-50 hover:scale-105 shadow-lg hover:shadow-xl active:scale-95"
     >
       <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      <div className="relative z-10 flex flex-col items-center justify-center">
+      <div className="relative z-10 flex items-center justify-center">
         {direction === 'backward' ? (
-          <>
-            <RotateCcw size={18} className="text-white group-hover:text-purple-300 transition-colors duration-200 sm:w-5 sm:h-5" />
-            <span className="text-[10px] sm:text-xs font-bold text-white group-hover:text-purple-300 transition-colors duration-200 -mt-0.5">10s</span>
-          </>
+          <div className="relative">
+            <RotateCcw size={24} className="text-white group-hover:text-purple-300 transition-colors duration-200 sm:w-7 sm:h-7" />
+            <span className="absolute inset-0 flex items-center justify-center text-[8px] sm:text-[9px] font-bold text-white group-hover:text-purple-300 transition-colors duration-200">10</span>
+          </div>
         ) : (
-          <>
-            <RotateCw size={18} className="text-white group-hover:text-purple-300 transition-colors duration-200 sm:w-5 sm:h-5" />
-            <span className="text-[10px] sm:text-xs font-bold text-white group-hover:text-purple-300 transition-colors duration-200 -mt-0.5">10s</span>
-          </>
+          <div className="relative">
+            <RotateCw size={24} className="text-white group-hover:text-purple-300 transition-colors duration-200 sm:w-7 sm:h-7" />
+            <span className="absolute inset-0 flex items-center justify-center text-[8px] sm:text-[9px] font-bold text-white group-hover:text-purple-300 transition-colors duration-200">10</span>
+          </div>
         )}
       </div>
     </button>
