@@ -195,19 +195,19 @@ const ProfilePage = () => {
           {/* Desktop menu options */}
           <div className="hidden md:flex gap-3">
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={() => navigate('/privacy-policy')}
-              className="text-white border-gray-600 hover:bg-gray-800"
+              className="bg-gray-800 hover:bg-gray-700 text-white border-gray-600"
             >
               <Shield size={16} className="mr-2" />
               Privacy Policy
             </Button>
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={() => navigate('/terms-of-service')}
-              className="text-white border-gray-600 hover:bg-gray-800"
+              className="bg-gray-800 hover:bg-gray-700 text-white border-gray-600"
             >
               <Shield size={16} className="mr-2" />
               Terms of Service
