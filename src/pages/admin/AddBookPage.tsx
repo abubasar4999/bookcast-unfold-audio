@@ -115,18 +115,18 @@ const AddBookPage = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="flex items-center gap-4 mb-6">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
         <Button
           variant="outline"
           size="sm"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 w-fit"
         >
           <ArrowLeft className="w-4 h-4" />
           Back
         </Button>
-        <h1 className="text-2xl font-bold text-gray-800">Add New Book</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Add New Book</h1>
       </div>
       
       <Card>
@@ -135,9 +135,9 @@ const AddBookPage = () => {
         </CardHeader>
         <CardContent>
           {/* Audio Upload Instructions */}
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h3 className="font-semibold text-blue-900 mb-2">📁 Audio File Setup Instructions</h3>
-            <ol className="text-sm text-blue-800 space-y-1">
+          <div className="mb-6 p-4 bg-muted border border-border rounded-lg">
+            <h3 className="font-semibold text-foreground mb-2">📁 Audio File Setup Instructions</h3>
+            <ol className="text-sm text-muted-foreground space-y-1">
               <li>1. Upload your MP3 file to the 'book-audios' storage bucket</li>
               <li>2. Copy the <strong>file name only</strong> (e.g., "alchemist.mp3")</li>
               <li>3. Paste the file name in the "Audio File Path" field below</li>
@@ -276,10 +276,10 @@ const AddBookPage = () => {
               </p>
             </div>
 
-            <div className="flex gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Button
                 type="submit"
-                className="bg-purple-600 hover:bg-purple-700 flex-1"
+                className="bg-primary hover:bg-primary/90 flex-1 order-2 sm:order-1"
                 disabled={addBookMutation.isPending}
               >
                 {addBookMutation.isPending ? 'Adding Book...' : 'Add Book'}
@@ -288,7 +288,7 @@ const AddBookPage = () => {
                 type="button"
                 variant="outline"
                 onClick={handleClearForm}
-                className="flex-1"
+                className="flex-1 order-1 sm:order-2"
                 disabled={addBookMutation.isPending}
               >
                 Clear Form

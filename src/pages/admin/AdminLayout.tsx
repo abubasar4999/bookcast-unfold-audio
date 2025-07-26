@@ -31,22 +31,35 @@ const sidebarItems = [
 ];
 
 const AdminLayout = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Default closed on mobile
   const location = useLocation();
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
+    <div className="min-h-screen bg-background flex">
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className={`bg-white shadow-lg transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-16'}`}>
-        <div className="p-4 border-b">
+      <div className={`
+        fixed lg:relative lg:translate-x-0 transition-all duration-300 z-50 lg:z-auto
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        ${sidebarOpen || !sidebarOpen ? 'w-64 lg:w-64' : 'lg:w-16'}
+        bg-card shadow-lg h-full
+      `}>
+        <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between">
-            {sidebarOpen && (
-              <h1 className="text-xl font-bold text-gray-800">BookCast Admin</h1>
+            {(sidebarOpen || window.innerWidth >= 1024) && (
+              <h1 className="text-xl font-bold text-foreground">BookCast Admin</h1>
             )}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-muted rounded-lg transition-colors"
             >
               {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -62,16 +75,24 @@ const AdminLayout = () => {
               return (
                 <li key={item.path}>
                   <button
-                    onClick={() => navigate(item.path)}
+                    onClick={() => {
+                      navigate(item.path);
+                      // Close sidebar on mobile after navigation
+                      if (window.innerWidth < 1024) {
+                        setSidebarOpen(false);
+                      }
+                    }}
                     className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                       isActive 
-                        ? 'bg-purple-100 text-purple-700' 
-                        : 'text-gray-600 hover:bg-gray-100'
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                     }`}
-                    title={!sidebarOpen ? item.label : undefined}
+                    title={!sidebarOpen && window.innerWidth >= 1024 ? item.label : undefined}
                   >
                     <Icon size={20} />
-                    {sidebarOpen && <span className="font-medium">{item.label}</span>}
+                    {(sidebarOpen || window.innerWidth < 1024) && (
+                      <span className="font-medium">{item.label}</span>
+                    )}
                   </button>
                 </li>
               );
@@ -81,25 +102,33 @@ const AdminLayout = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white shadow-sm border-b px-6 py-4">
+      <div className="flex-1 flex flex-col overflow-hidden lg:ml-0">
+        <header className="bg-card shadow-sm border-b border-border px-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-gray-800">
-              {sidebarItems.find(item => item.path === location.pathname)?.label || 'Dashboard'}
-            </h2>
             <div className="flex items-center gap-4">
-              <button className="p-2 hover:bg-gray-100 rounded-lg relative">
-                <Bell size={20} className="text-gray-600" />
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="lg:hidden p-2 hover:bg-muted rounded-lg transition-colors"
+              >
+                <Menu size={20} />
               </button>
-              <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">A</span>
+              <h2 className="text-lg lg:text-2xl font-semibold text-foreground truncate">
+                {sidebarItems.find(item => item.path === location.pathname)?.label || 'Dashboard'}
+              </h2>
+            </div>
+            <div className="flex items-center gap-2 lg:gap-4">
+              <button className="p-2 hover:bg-muted rounded-lg relative">
+                <Bell size={20} className="text-muted-foreground" />
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-destructive rounded-full"></span>
+              </button>
+              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                <span className="text-primary-foreground text-sm font-medium">A</span>
               </div>
             </div>
           </div>
         </header>
         
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 overflow-auto p-4 lg:p-6">
           <Outlet />
         </main>
       </div>
