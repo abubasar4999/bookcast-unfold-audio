@@ -61,22 +61,18 @@ const MiniPlayer: React.FC = () => {
 
   return (
     <div 
-      className="fixed left-0 right-0 z-50" 
-      style={{ 
-        bottom: 'calc(10vh + env(safe-area-inset-bottom, 0px))'
-      }}
+      className="fixed left-0 right-0 bottom-20 md:bottom-6 z-50 px-0 md:px-6 lg:px-8"
     >
       <div 
         onClick={handlePlayerClick}
-        className="bg-gradient-to-r from-gray-900/98 to-gray-800/98 backdrop-blur-xl border border-gray-700/40 shadow-2xl cursor-pointer hover:shadow-purple-500/20 transition-all duration-300 
-                   mobile:mx-0 mobile:rounded-none 
-                   md:rounded-2xl md:mx-6 md:max-w-4xl md:left-1/2 md:right-auto md:transform md:-translate-x-1/2 
-                   lg:max-w-5xl lg:mx-8
-                   hover:scale-[1.02] hover:border-purple-500/30"
+        className="bg-gradient-to-r from-gray-900/95 to-gray-800/95 backdrop-blur-xl border border-gray-700/50 shadow-2xl cursor-pointer hover:shadow-purple-500/20 transition-all duration-300 
+                   rounded-none md:rounded-2xl
+                   mx-0 md:mx-auto md:max-w-4xl lg:max-w-5xl
+                   hover:scale-[1.01] hover:border-purple-500/40 hover:shadow-purple-500/30"
       >
         {/* Functional Progress bar */}
         <div 
-          className="absolute top-0 left-0 right-0 h-1 bg-gray-700/50 overflow-hidden cursor-pointer md:rounded-t-lg"
+          className="absolute top-0 left-0 right-0 h-1 md:h-1.5 bg-gray-700/50 overflow-hidden cursor-pointer md:rounded-t-2xl"
           onClick={handleProgressClick}
         >
           <div 
@@ -85,9 +81,9 @@ const MiniPlayer: React.FC = () => {
           />
         </div>
 
-        <div className="flex items-center p-3 pt-4 md:p-4 md:pt-5">
+        <div className="flex items-center p-3 pt-4 md:p-5 md:pt-6 lg:p-6 lg:pt-7">
           {/* Book cover */}
-          <div className="w-12 h-12 md:w-16 md:h-16 lg:w-18 lg:h-18 rounded-lg md:rounded-xl overflow-hidden flex-shrink-0 shadow-lg hover:shadow-xl transition-shadow">
+          <div className="w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 rounded-lg md:rounded-xl overflow-hidden flex-shrink-0 shadow-lg hover:shadow-xl transition-shadow">
             <img
               src={state.currentBook.cover || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop'}
               alt={state.currentBook.title}
