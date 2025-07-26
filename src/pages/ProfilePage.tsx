@@ -148,45 +148,71 @@ const ProfilePage = () => {
   return (
     <div className="min-h-screen bg-gray-950 pt-12 pb-20">
       <div className="px-4 max-w-4xl mx-auto">
-        {/* Header with hamburger menu */}
+        {/* Header with hamburger menu for mobile */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-white">Profile</h1>
-          <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-white hover:bg-gray-800">
-                <Menu size={24} />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="bg-gray-900 border-gray-700 text-white w-80">
-              <SheetHeader>
-                <SheetTitle className="text-white">Menu</SheetTitle>
-              </SheetHeader>
-              <div className="mt-6 space-y-3">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start text-white hover:bg-gray-800 h-12"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    navigate('/privacy-policy');
-                  }}
-                >
-                  <Shield size={20} className="mr-3" />
-                  Privacy Policy
+          
+          {/* Mobile hamburger menu */}
+          <div className="md:hidden">
+            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-white hover:bg-gray-800">
+                  <Menu size={24} />
                 </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start text-white hover:bg-gray-800 h-12"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    navigate('/terms-of-service');
-                  }}
-                >
-                  <Shield size={20} className="mr-3" />
-                  Terms of Service
-                </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
+              </SheetTrigger>
+              <SheetContent side="right" className="bg-gray-900 border-gray-700 text-white w-80">
+                <SheetHeader>
+                  <SheetTitle className="text-white">Menu</SheetTitle>
+                </SheetHeader>
+                <div className="mt-6 space-y-3">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-white hover:bg-gray-800 h-12"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      navigate('/privacy-policy');
+                    }}
+                  >
+                    <Shield size={20} className="mr-3" />
+                    Privacy Policy
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-white hover:bg-gray-800 h-12"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      navigate('/terms-of-service');
+                    }}
+                  >
+                    <Shield size={20} className="mr-3" />
+                    Terms of Service
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+
+          {/* Desktop menu options */}
+          <div className="hidden md:flex gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/privacy-policy')}
+              className="text-white border-gray-600 hover:bg-gray-800"
+            >
+              <Shield size={16} className="mr-2" />
+              Privacy Policy
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/terms-of-service')}
+              className="text-white border-gray-600 hover:bg-gray-800"
+            >
+              <Shield size={16} className="mr-2" />
+              Terms of Service
+            </Button>
+          </div>
         </div>
 
         {/* Profile Header */}
