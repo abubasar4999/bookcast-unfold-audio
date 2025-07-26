@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -19,7 +20,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, Archive, ArchiveRestore, Search, Undo } from 'lucide-react';
+import { Edit, Trash2, Archive, ArchiveRestore, Search, Undo, ArrowLeft } from 'lucide-react';
 import EditBookDialog from '@/components/admin/EditBookDialog';
 import DeleteBookDialog from '@/components/admin/DeleteBookDialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,6 +30,7 @@ const ManageBooks = () => {
   const [editingBook, setEditingBook] = useState(null);
   const [deletingBook, setDeletingBook] = useState(null);
   const [showDeletedBooks, setShowDeletedBooks] = useState(false);
+  const navigate = useNavigate();
   
   const {
     books,
@@ -73,9 +75,20 @@ const ManageBooks = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800">Manage Books</h1>
-          <p className="text-gray-600">View, edit, and manage your book collection</p>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">Manage Books</h1>
+            <p className="text-gray-600">View, edit, and manage your book collection</p>
+          </div>
         </div>
         <Button
           onClick={() => setShowDeletedBooks(!showDeletedBooks)}

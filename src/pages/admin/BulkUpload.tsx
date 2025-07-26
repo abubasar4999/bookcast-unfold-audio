@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Upload, Download, Check, X } from 'lucide-react';
+import { Upload, Download, Check, X, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface BookData {
@@ -33,6 +34,7 @@ const BulkUpload = () => {
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const parseCSV = (csvText: string): BookData[] => {
     const lines = csvText.split('\n').filter(line => line.trim());
@@ -180,9 +182,20 @@ const BulkUpload = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-800">Bulk Upload Books</h1>
-        <p className="text-gray-600">Upload multiple books at once using a CSV file</p>
+      <div className="flex items-center gap-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800">Bulk Upload Books</h1>
+          <p className="text-gray-600">Upload multiple books at once using a CSV file</p>
+        </div>
       </div>
 
       {/* Upload Instructions */}

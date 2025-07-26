@@ -1,9 +1,13 @@
 
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { useNavigate } from 'react-router-dom';
 import { useInsightsData } from '@/hooks/useInsightsData';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 const InsightsPage = () => {
   const { data: insightsData, isLoading, error } = useInsightsData();
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -40,6 +44,19 @@ const InsightsPage = () => {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </Button>
+        <h1 className="text-3xl font-bold text-gray-800">Analytics & Insights</h1>
+      </div>
+      
       {/* Gender Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow-sm p-6">

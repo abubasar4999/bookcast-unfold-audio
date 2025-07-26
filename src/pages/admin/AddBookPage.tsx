@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,10 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { ArrowLeft } from 'lucide-react';
 
 const AddBookPage = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
     title: '',
@@ -104,9 +107,22 @@ const AddBookPage = () => {
 
   return (
     <div className="max-w-2xl mx-auto">
+      <div className="flex items-center gap-4 mb-6">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </Button>
+        <h1 className="text-2xl font-bold text-gray-800">Add New Book</h1>
+      </div>
+      
       <Card>
         <CardHeader>
-          <CardTitle>Add New Book</CardTitle>
+          <CardTitle>Book Details</CardTitle>
         </CardHeader>
         <CardContent>
           {/* Audio Upload Instructions */}
