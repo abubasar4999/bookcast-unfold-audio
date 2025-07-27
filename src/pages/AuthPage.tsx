@@ -43,6 +43,8 @@ const AuthPage = () => {
             description: "Please check your email to verify your account.",
             variant: "default"
           });
+          // Redirect to genre selection after successful signup
+          navigate('/genre-selection');
         }
       } else {
         const { error } = await signIn(email, password);
@@ -70,7 +72,7 @@ const AuthPage = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/`
+          redirectTo: `${window.location.origin}/genre-selection`
         }
       });
       
