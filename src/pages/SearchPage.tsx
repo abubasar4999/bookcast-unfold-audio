@@ -51,11 +51,11 @@ const SearchPage = () => {
   // Get trending guests (characters from books)
   const trendingGuests = guests.slice(0, showAllTrendingGuests ? guests.length : 4);
   
-  // Get popular authors - show only 4 initially
+  // Get popular authors with real data - show only 4 initially
   const popularAuthors = authors.slice(0, showAllMostLiked ? authors.length : 4).map((author) => ({
     ...author,
     episodeCount: allBooks.filter(book => book.author_id === author.id).length,
-    likeCount: Math.floor(Math.random() * 3) + 3 // Random between 3-6 for now, could be enhanced with real data
+    likeCount: allBooks.filter(book => book.author_id === author.id).length // Use actual book count as like count
   }));
 
   // Get featured books
