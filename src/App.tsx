@@ -34,6 +34,7 @@ import AdminTermsOfServicePage from '@/pages/admin/AdminTermsOfServicePage';
 import AuthorPage from '@/pages/AuthorPage';
 import GuestPage from '@/pages/GuestPage';
 import GenrePage from '@/pages/GenrePage';
+import GenreSelectionPage from '@/pages/GenreSelectionPage';
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ function App() {
                     <Route path="/author/:id" element={<AuthorPage />} />
                     <Route path="/guest/:id" element={<GuestPage />} />
                     <Route path="/genre/:genre" element={<GenrePage />} />
+                    <Route path="/genre-selection" element={<GenreSelectionPage />} />
                     <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                     <Route path="/terms-of-service" element={<TermsOfServicePage />} />
                     
