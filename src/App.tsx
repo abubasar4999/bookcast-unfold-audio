@@ -31,6 +31,7 @@ import InsightsPage from '@/pages/admin/InsightsPage';
 import AdminPrivacyPolicyPage from '@/pages/admin/AdminPrivacyPolicyPage';
 import TermsOfServicePage from '@/pages/TermsOfServicePage';
 import AdminTermsOfServicePage from '@/pages/admin/AdminTermsOfServicePage';
+import HeroCarouselManagePage from '@/pages/admin/HeroCarouselManagePage';
 import AuthorPage from '@/pages/AuthorPage';
 import GuestPage from '@/pages/GuestPage';
 import GenrePage from '@/pages/GenrePage';
@@ -78,13 +79,14 @@ function App() {
                       <Route index element={<AdminDashboard />} />
                       <Route path="manage-books" element={<ManageBooks />} />
                       <Route path="add-book" element={<AddBookPage />} />
+                      <Route path="hero-carousel" element={<HeroCarouselManagePage />} />
                       <Route path="bulk-upload" element={<BulkUpload />} />
                       <Route path="users" element={<UserDataPage />} />
                       <Route path="invite-admins" element={<InviteAdmins />} />
                       <Route path="notifications" element={<NotificationPage />} />
                       <Route path="insights" element={<InsightsPage />} />
-                <Route path="privacy-policy" element={<AdminPrivacyPolicyPage />} />
-                <Route path="terms-of-service" element={<AdminTermsOfServicePage />} />
+                      <Route path="privacy-policy" element={<AdminPrivacyPolicyPage />} />
+                      <Route path="terms-of-service" element={<AdminTermsOfServicePage />} />
                     </Route>
                   </Routes>
                   

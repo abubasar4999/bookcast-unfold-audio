@@ -13,16 +13,18 @@ import {
   UserPlus,
   Upload,
   Settings,
-  Shield
+  Shield,
+  Image
 } from 'lucide-react';
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
   { icon: BookOpen, label: 'Manage Books', path: '/admin/manage-books' },
+  { icon: Plus, label: 'Add New Book', path: '/admin/add-book' },
+  { icon: Image, label: 'Hero Carousel', path: '/admin/hero-carousel' },
   { icon: Upload, label: 'Bulk Upload', path: '/admin/bulk-upload' },
   { icon: Users, label: 'User Data', path: '/admin/users' },
   { icon: UserPlus, label: 'Invite Admins', path: '/admin/invite-admins' },
-  { icon: Plus, label: 'Add New Book', path: '/admin/add-book' },
   { icon: Bell, label: 'Notifications', path: '/admin/notifications' },
   { icon: BarChart3, label: 'Insights', path: '/admin/insights' },
   { icon: Shield, label: 'Privacy Policy', path: '/admin/privacy-policy' },

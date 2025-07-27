@@ -5,7 +5,7 @@ import { Plus, Play } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Book } from '@/hooks/useBooks';
+import { useHeroCarousel } from '@/hooks/useHeroCarousel';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
@@ -18,45 +18,11 @@ interface FeaturedBannerCarouselProps {
 }
 
 const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps) => {
-  const [featuredBooks, setFeaturedBooks] = useState<Book[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: carouselItems = [], isLoading } = useHeroCarousel();
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Fetch featured books
-  useEffect(() => {
-    const fetchFeaturedBooks = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('books')
-          .select('*')
-          .eq('is_trending', true)
-          .eq('status', 'active')
-          .order('popularity_score', { ascending: false })
-          .limit(6);
-
-        if (error) {
-          console.error('Error fetching featured books:', error);
-          return;
-        }
-
-        const mappedBooks = (data || []).map(book => ({
-          ...book,
-          cover: book.cover_url,
-        }));
-
-        setFeaturedBooks(mappedBooks);
-      } catch (error) {
-        console.error('Error:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchFeaturedBooks();
-  }, []);
-
-  const handleAddToLibrary = async (book: Book) => {
+  const handleAddToLibrary = async (bookId: string) => {
     if (!user) {
       toast.error('Please sign in to add books to your library');
       navigate('/auth', { state: { returnTo: '/' } });
@@ -69,7 +35,7 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
         .from('book_likes')
         .select('id')
         .eq('user_id', user.id)
-        .eq('book_id', book.id)
+        .eq('book_id', bookId)
         .maybeSingle();
 
       if (existing) {
@@ -82,7 +48,7 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
         .from('book_likes')
         .insert({
           user_id: user.id,
-          book_id: book.id
+          book_id: bookId
         });
 
       if (error) {
@@ -98,8 +64,21 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
     }
   };
 
-  const handleStartListening = (bookId: string) => {
-    navigate(`/player/${bookId}`);
+  const handleStartListening = (item: any) => {
+    if (item.cta_link) {
+      // Custom CTA link
+      if (item.cta_link.startsWith('/')) {
+        navigate(item.cta_link);
+      } else {
+        window.open(item.cta_link, '_blank');
+      }
+    } else if (item.book_id) {
+      // Default to player page for linked book
+      navigate(`/player/${item.book_id}`);
+    } else {
+      // Fallback to general player or books page
+      navigate('/search');
+    }
   };
 
   if (isLoading) {
@@ -110,7 +89,7 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
     );
   }
 
-  if (!featuredBooks.length) {
+  if (!carouselItems.length) {
     return null;
   }
 
@@ -134,14 +113,14 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
           loop={true}
           className="featured-carousel"
         >
-          {featuredBooks.map((book) => (
-            <SwiperSlide key={book.id}>
+          {carouselItems.map((item) => (
+            <SwiperSlide key={item.id}>
               <div className="relative w-full h-80 md:h-96 rounded-2xl overflow-hidden group/card">
                 {/* Background Image with improved contrast */}
                 <div 
                   className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover/card:scale-105"
                   style={{
-                    backgroundImage: `url(${book.cover || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=600&fit=crop'})`,
+                    backgroundImage: `url(${item.background_image_url || item.books?.cover_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=600&fit=crop'})`,
                   }}
                 />
                 
@@ -153,27 +132,31 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
                 {/* Content with improved positioning and increased top padding to prevent cropping */}
                 <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-end pb-10 pt-8 md:pt-12">
                   <div className="space-y-2.5 max-w-2xl">
-                    {/* Genre Badge with better contrast and smaller text */}
-                    <span className="inline-block px-3 py-1.5 bg-white/20 backdrop-blur-md text-white text-xs md:text-sm font-semibold rounded-full border border-white/30 shadow-lg max-w-fit">
-                      <span className="truncate block max-w-28 md:max-w-44">{book.genre}</span>
-                    </span>
+                    {/* Genre/Category Badge */}
+                    {item.books?.title && (
+                      <span className="inline-block px-3 py-1.5 bg-white/20 backdrop-blur-md text-white text-xs md:text-sm font-semibold rounded-full border border-white/30 shadow-lg max-w-fit">
+                        <span className="truncate block max-w-28 md:max-w-44">Book Featured</span>
+                      </span>
+                    )}
                     
-                    {/* Title with enhanced visibility and proper line height - reduced max height to prevent overflow */}
+                    {/* Title with enhanced visibility and proper line height */}
                     <h3 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight max-h-24 md:max-h-28 overflow-hidden drop-shadow-2xl [text-shadow:_2px_2px_8px_rgb(0_0_0_/_80%)]">
                       <span className="block leading-[1.1] line-clamp-2">
-                        {book.title}
+                        {item.title}
                       </span>
                     </h3>
                     
-                    {/* Author with better contrast */}
-                    <p className="text-gray-100 text-base md:text-lg lg:text-xl font-medium drop-shadow-lg [text-shadow:_1px_1px_4px_rgb(0_0_0_/_60%)]">
-                      by {book.author}
-                    </p>
+                    {/* Subtitle */}
+                    {item.subtitle && (
+                      <p className="text-gray-100 text-base md:text-lg lg:text-xl font-medium drop-shadow-lg [text-shadow:_1px_1px_4px_rgb(0_0_0_/_60%)]">
+                        {item.subtitle}
+                      </p>
+                    )}
                     
-                    {/* Duration with improved visibility */}
-                    {book.duration && (
-                      <p className="text-gray-200 text-sm md:text-base drop-shadow-md [text-shadow:_1px_1px_2px_rgb(0_0_0_/_50%)]">
-                        {book.duration}
+                    {/* Description */}
+                    {item.description && (
+                      <p className="text-gray-200 text-sm md:text-base drop-shadow-md [text-shadow:_1px_1px_2px_rgb(0_0_0_/_50%)] line-clamp-2">
+                        {item.description}
                       </p>
                     )}
                     
@@ -182,24 +165,26 @@ const FeaturedBannerCarousel = ({ className = '' }: FeaturedBannerCarouselProps)
                       <Button
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleStartListening(book.id);
+                          handleStartListening(item);
                         }}
                         className="bg-white text-black hover:bg-gray-100 font-bold px-6 md:px-8 py-3 md:py-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-2xl border-2 border-white/20 backdrop-blur-sm text-sm md:text-base lg:text-lg"
                       >
                         <Play size={16} className="mr-2 md:mr-3 fill-current" />
-                        Start Listening
+                        {item.cta_text}
                       </Button>
                       
-                      <Button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleAddToLibrary(book);
-                        }}
-                        variant="outline"
-                        className="bg-black/40 text-white border-white/40 hover:bg-black/60 hover:border-white/60 hover:text-white font-semibold px-4 md:px-6 py-3 md:py-4 rounded-full transition-all duration-300 transform hover:scale-105 backdrop-blur-md shadow-xl text-sm md:text-base lg:text-lg"
-                      >
-                        Add to Library
-                      </Button>
+                      {item.book_id && (
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddToLibrary(item.book_id!);
+                          }}
+                          variant="outline"
+                          className="bg-black/40 text-white border-white/40 hover:bg-black/60 hover:border-white/60 hover:text-white font-semibold px-4 md:px-6 py-3 md:py-4 rounded-full transition-all duration-300 transform hover:scale-105 backdrop-blur-md shadow-xl text-sm md:text-base lg:text-lg"
+                        >
+                          Add to Library
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>

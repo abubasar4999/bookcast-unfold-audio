@@ -288,6 +288,59 @@ export type Database = {
         }
         Relationships: []
       }
+      hero_carousel: {
+        Row: {
+          background_image_url: string | null
+          book_id: string | null
+          created_at: string
+          cta_link: string | null
+          cta_text: string | null
+          description: string | null
+          display_order: number
+          id: string
+          is_active: boolean
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          background_image_url?: string | null
+          book_id?: string | null
+          created_at?: string
+          cta_link?: string | null
+          cta_text?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          background_image_url?: string | null
+          book_id?: string | null
+          created_at?: string
+          cta_link?: string | null
+          cta_text?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hero_carousel_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listening_progress: {
         Row: {
           book_id: string
