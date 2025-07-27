@@ -51,11 +51,11 @@ const SearchPage = () => {
   // Get trending guests (characters from books)
   const trendingGuests = guests.slice(0, showAllTrendingGuests ? guests.length : 4);
   
-  // Get popular authors with mock data - show only 4 initially
-  const popularAuthors = authors.slice(0, showAllMostLiked ? authors.length : 4).map((author, index) => ({
+  // Get popular authors - show only 4 initially
+  const popularAuthors = authors.slice(0, showAllMostLiked ? authors.length : 4).map((author) => ({
     ...author,
-    episodeCount: [12, 8, 15, 6, 9, 11, 7, 13][index] || 5,
-    likeCount: [4.8, 3.2, 5.7, 2.9, 4.1, 3.8, 2.5, 4.6][index] || 3.5
+    episodeCount: allBooks.filter(book => book.author_id === author.id).length,
+    likeCount: Math.floor(Math.random() * 3) + 3 // Random between 3-6 for now, could be enhanced with real data
   }));
 
   // Get featured books

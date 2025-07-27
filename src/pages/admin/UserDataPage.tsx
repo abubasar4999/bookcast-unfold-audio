@@ -1,5 +1,5 @@
-
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Download, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,74 +11,82 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { supabase } from '@/integrations/supabase/client';
 
-const mockUsers = [
-  {
-    id: 1,
-    name: 'Alex Johnson',
-    email: 'alex.johnson@email.com',
-    phone: '+1 (555) 123-4567',
-    joinDate: '2024-03-15',
-    gender: 'Male',
-    country: 'United States'
-  },
-  {
-    id: 2,
-    name: 'Sarah Chen',
-    email: 'sarah.chen@email.com',
-    phone: '+1 (555) 987-6543',
-    joinDate: '2024-03-10',
-    gender: 'Female',
-    country: 'Canada'
-  },
-  {
-    id: 3,
-    name: 'Michael Rodriguez',
-    email: 'michael.r@email.com',
-    phone: '+1 (555) 456-7890',
-    joinDate: '2024-03-08',
-    gender: 'Male',
-    country: 'United States'
-  },
-  {
-    id: 4,
-    name: 'Emma Thompson',
-    email: 'emma.thompson@email.com',
-    phone: '+44 20 7946 0958',
-    joinDate: '2024-03-05',
-    gender: 'Female',
-    country: 'United Kingdom'
-  },
-  {
-    id: 5,
-    name: 'David Kim',
-    email: 'david.kim@email.com',
-    phone: '+82 2-3456-7890',
-    joinDate: '2024-03-01',
-    gender: 'Male',
-    country: 'South Korea'
-  }
-];
+interface UserProfile {
+  id: string;
+  full_name: string | null;
+  phone: string | null;
+  created_at: string;
+  user_email?: string;
+}
+
+interface UserStats {
+  totalUsers: number;
+  newThisMonth: number;
+  activeToday: number;
+}
 
 const UserDataPage = () => {
-  const [users] = useState(mockUsers);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  const { data: profiles = [], isLoading } = useQuery({
+    queryKey: ['user-profiles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data as UserProfile[];
+    },
+  });
+
+  const { data: stats } = useQuery({
+    queryKey: ['user-stats-summary'],
+    queryFn: async () => {
+      // Get total users count
+      const { count: totalUsers } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+
+      // Get new users this month
+      const thisMonth = new Date();
+      thisMonth.setDate(1);
+      const { count: newThisMonth } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', thisMonth.toISOString());
+
+      // Get active users today
+      const today = new Date().toISOString().split('T')[0];
+      const { count: activeToday } = await supabase
+        .from('user_stats')
+        .select('*', { count: 'exact', head: true })
+        .eq('last_active_date', today);
+
+      return {
+        totalUsers: totalUsers || 0,
+        newThisMonth: newThisMonth || 0,
+        activeToday: activeToday || 0,
+      } as UserStats;
+    },
+  });
+
+  const filteredUsers = profiles.filter(user =>
+    (user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+    (user.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
   );
 
   const handleExportCSV = () => {
     const csvContent = [
-      ['Name', 'Email', 'Phone', 'Join Date', 'Gender', 'Country'],
+      ['Name', 'Phone', 'Join Date', 'User ID'],
       ...filteredUsers.map(user => [
-        user.name,
-        user.email,
-        user.phone,
-        user.joinDate,
-        user.gender,
-        user.country
+        user.full_name || 'N/A',
+        user.phone || 'N/A',
+        new Date(user.created_at).toLocaleDateString(),
+        user.id
       ])
     ].map(row => row.join(',')).join('\n');
 
@@ -90,6 +98,21 @@ const UserDataPage = () => {
     a.click();
     window.URL.revokeObjectURL(url);
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="animate-pulse">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-20 bg-gray-200 rounded-lg"></div>
+            ))}
+          </div>
+          <div className="h-64 bg-gray-200 rounded-lg"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -115,15 +138,15 @@ const UserDataPage = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white rounded-lg p-4 shadow-sm">
           <p className="text-sm text-gray-600">Total Users</p>
-          <p className="text-2xl font-bold text-gray-800">{users.length}</p>
+          <p className="text-2xl font-bold text-gray-800">{stats?.totalUsers || 0}</p>
         </div>
         <div className="bg-white rounded-lg p-4 shadow-sm">
           <p className="text-sm text-gray-600">New This Month</p>
-          <p className="text-2xl font-bold text-gray-800">23</p>
+          <p className="text-2xl font-bold text-gray-800">{stats?.newThisMonth || 0}</p>
         </div>
         <div className="bg-white rounded-lg p-4 shadow-sm">
           <p className="text-sm text-gray-600">Active Today</p>
-          <p className="text-2xl font-bold text-gray-800">89</p>
+          <p className="text-2xl font-bold text-gray-800">{stats?.activeToday || 0}</p>
         </div>
       </div>
 
@@ -133,22 +156,18 @@ const UserDataPage = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>Join Date</TableHead>
-              <TableHead>Gender</TableHead>
-              <TableHead>Country</TableHead>
+              <TableHead>User ID</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredUsers.map((user) => (
               <TableRow key={user.id}>
-                <TableCell className="font-medium">{user.name}</TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>{user.phone}</TableCell>
-                <TableCell>{user.joinDate}</TableCell>
-                <TableCell>{user.gender}</TableCell>
-                <TableCell>{user.country}</TableCell>
+                <TableCell className="font-medium">{user.full_name || 'N/A'}</TableCell>
+                <TableCell>{user.phone || 'N/A'}</TableCell>
+                <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
+                <TableCell className="font-mono text-sm">{user.id}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -156,7 +175,7 @@ const UserDataPage = () => {
         
         {filteredUsers.length === 0 && (
           <div className="p-8 text-center text-gray-500">
-            No users found matching your search.
+            {profiles.length === 0 ? 'No users found.' : 'No users found matching your search.'}
           </div>
         )}
       </div>
