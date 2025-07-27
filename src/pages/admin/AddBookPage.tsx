@@ -10,8 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft } from 'lucide-react';
-import { useAuthors, useGuests } from '@/hooks/useBooks';
+import { ArrowLeft, Plus } from 'lucide-react';
+import { useAuthors, useGuests, useGenres } from '@/hooks/useBooks';
 
 const AddBookPage = () => {
   const { toast } = useToast();
@@ -19,25 +19,99 @@ const AddBookPage = () => {
   const navigate = useNavigate();
   const { data: authors = [] } = useAuthors();
   const { data: guests = [] } = useGuests();
+  const { data: genres = [] } = useGenres();
   
   const [formData, setFormData] = useState({
     title: '',
     author: '',
     author_id: '',
+    guest_id: '',
     genre: '',
     description: '',
     cover_url: '',
     audio_path: '',
     duration: '',
-    guest_id: ''
+    // New fields
+    author_description: '',
+    author_image_url: '',
+    guest_name: '',
+    guest_description: '',
+    guest_image_url: '',
+    podcast_description: '',
+    new_genre_name: ''
   });
+
+  const [createNewAuthor, setCreateNewAuthor] = useState(false);
+  const [createNewGuest, setCreateNewGuest] = useState(false);
+  const [createNewGenre, setCreateNewGenre] = useState(false);
 
   const addBookMutation = useMutation({
     mutationFn: async (bookData: typeof formData) => {
+      let authorId = bookData.author_id;
+      let guestId = bookData.guest_id;
+      let genreName = bookData.genre;
+
+      // Create new author if needed
+      if (createNewAuthor && bookData.author) {
+        const { data: newAuthor, error: authorError } = await supabase
+          .from('authors')
+          .insert({
+            name: bookData.author,
+            bio: bookData.author_description,
+            avatar_url: bookData.author_image_url
+          })
+          .select()
+          .single();
+        
+        if (authorError) throw authorError;
+        authorId = newAuthor.id;
+      }
+
+      // Create new guest if needed
+      if (createNewGuest && bookData.guest_name) {
+        const { data: newGuest, error: guestError } = await supabase
+          .from('guests')
+          .insert({
+            name: bookData.guest_name,
+            bio: bookData.guest_description,
+            avatar_url: bookData.guest_image_url
+          })
+          .select()
+          .single();
+        
+        if (guestError) throw guestError;
+        guestId = newGuest.id;
+      }
+
+      // Create new genre if needed
+      if (createNewGenre && bookData.new_genre_name) {
+        const { error: genreError } = await supabase
+          .from('genres')
+          .insert({
+            name: bookData.new_genre_name,
+            color: '#6366f1',
+            gradient: 'from-blue-500 to-purple-600'
+          });
+        
+        if (genreError) throw genreError;
+        genreName = bookData.new_genre_name;
+      }
+
+      // Insert the book with proper description
+      const finalDescription = bookData.podcast_description || bookData.description;
+      
       const { data, error } = await supabase
         .from('books')
         .insert({
-          ...bookData,
+          title: bookData.title,
+          author: bookData.author,
+          author_id: authorId,
+          guest_id: guestId,
+          genre: genreName,
+          description: finalDescription,
+          cover_url: bookData.cover_url,
+          audio_path: bookData.audio_path,
+          duration: bookData.duration,
           status: 'active',
           is_trending: false,
           popularity_score: 0,
@@ -59,13 +133,23 @@ const AddBookPage = () => {
         title: '',
         author: '',
         author_id: '',
+        guest_id: '',
         genre: '',
         description: '',
         cover_url: '',
         audio_path: '',
         duration: '',
-        guest_id: ''
+        author_description: '',
+        author_image_url: '',
+        guest_name: '',
+        guest_description: '',
+        guest_image_url: '',
+        podcast_description: '',
+        new_genre_name: ''
       });
+      setCreateNewAuthor(false);
+      setCreateNewGuest(false);
+      setCreateNewGenre(false);
       
       // Invalidate queries to refresh the book lists
       queryClient.invalidateQueries({ queryKey: ['admin-books'] });
@@ -84,10 +168,19 @@ const AddBookPage = () => {
     e.preventDefault();
     
     // Basic validation
-    if (!formData.title || !formData.author || !formData.genre) {
+    if (!formData.title || !formData.author || (!formData.genre && !formData.new_genre_name)) {
       toast({
         title: 'Missing Required Fields',
         description: 'Please fill in title, author, and genre.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (createNewGenre && !formData.new_genre_name) {
+      toast({
+        title: 'Missing Genre Name',
+        description: 'Please enter a name for the new genre.',
         variant: 'destructive',
       });
       return;
@@ -105,13 +198,23 @@ const AddBookPage = () => {
       title: '',
       author: '',
       author_id: '',
+      guest_id: '',
       genre: '',
       description: '',
       cover_url: '',
       audio_path: '',
       duration: '',
-      guest_id: ''
+      author_description: '',
+      author_image_url: '',
+      guest_name: '',
+      guest_description: '',
+      guest_image_url: '',
+      podcast_description: '',
+      new_genre_name: ''
     });
+    setCreateNewAuthor(false);
+    setCreateNewGuest(false);
+    setCreateNewGenre(false);
   };
 
   return (
@@ -172,83 +275,215 @@ const AddBookPage = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label htmlFor="author_id">Select Author (Optional)</Label>
-                <Select value={formData.author_id} onValueChange={(value) => handleInputChange('author_id', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Link to author profile" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {authors.map((author) => (
-                      <SelectItem key={author.id} value={author.id}>
-                        {author.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            {/* Author Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Label>Author Information</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCreateNewAuthor(!createNewAuthor)}
+                  className="flex items-center gap-1"
+                >
+                  <Plus className="w-3 h-3" />
+                  {createNewAuthor ? 'Use Existing' : 'Create New'}
+                </Button>
               </div>
+              
+              {!createNewAuthor ? (
+                <div>
+                  <Label htmlFor="author_id">Select Existing Author</Label>
+                  <Select value={formData.author_id} onValueChange={(value) => handleInputChange('author_id', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Link to author profile" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {authors.map((author) => (
+                        <SelectItem key={author.id} value={author.id}>
+                          {author.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <Label htmlFor="author_description">Author Description</Label>
+                    <Textarea
+                      id="author_description"
+                      value={formData.author_description}
+                      onChange={(e) => handleInputChange('author_description', e.target.value)}
+                      placeholder="Enter author bio/description"
+                      rows={3}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="author_image_url">Author Image URL</Label>
+                    <Input
+                      id="author_image_url"
+                      type="url"
+                      value={formData.author_image_url}
+                      onChange={(e) => handleInputChange('author_image_url', e.target.value)}
+                      placeholder="https://example.com/author-image.jpg"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
 
-              <div>
-                <Label htmlFor="guest_id">Select Guest/Character (Optional)</Label>
-                <Select value={formData.guest_id} onValueChange={(value) => handleInputChange('guest_id', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Link to guest/character" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {guests.map((guest) => (
-                      <SelectItem key={guest.id} value={guest.id}>
-                        {guest.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            {/* Guest Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Label>Guest Information (Optional)</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCreateNewGuest(!createNewGuest)}
+                  className="flex items-center gap-1"
+                >
+                  <Plus className="w-3 h-3" />
+                  {createNewGuest ? 'Use Existing' : 'Create New'}
+                </Button>
+              </div>
+              
+              {!createNewGuest ? (
+                <div>
+                  <Label htmlFor="guest_id">Select Existing Guest</Label>
+                  <Select value={formData.guest_id} onValueChange={(value) => handleInputChange('guest_id', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Link to guest/character" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {guests.map((guest) => (
+                        <SelectItem key={guest.id} value={guest.id}>
+                          {guest.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <Label htmlFor="guest_name">Guest Name</Label>
+                    <Input
+                      id="guest_name"
+                      type="text"
+                      value={formData.guest_name}
+                      onChange={(e) => handleInputChange('guest_name', e.target.value)}
+                      placeholder="Enter guest name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="guest_description">Guest Description</Label>
+                    <Textarea
+                      id="guest_description"
+                      value={formData.guest_description}
+                      onChange={(e) => handleInputChange('guest_description', e.target.value)}
+                      placeholder="Enter guest bio/description"
+                      rows={3}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="guest_image_url">Guest Image URL</Label>
+                    <Input
+                      id="guest_image_url"
+                      type="url"
+                      value={formData.guest_image_url}
+                      onChange={(e) => handleInputChange('guest_image_url', e.target.value)}
+                      placeholder="https://example.com/guest-image.jpg"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Genre Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Label>Genre *</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCreateNewGenre(!createNewGenre)}
+                  className="flex items-center gap-1"
+                >
+                  <Plus className="w-3 h-3" />
+                  {createNewGenre ? 'Use Existing' : 'Create New'}
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  {!createNewGenre ? (
+                    <>
+                      <Label htmlFor="genre">Select Existing Genre</Label>
+                      <Select value={formData.genre} onValueChange={(value) => handleInputChange('genre', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select genre" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {genres.map((genre) => (
+                            <SelectItem key={genre.id} value={genre.name}>
+                              {genre.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </>
+                  ) : (
+                    <>
+                      <Label htmlFor="new_genre_name">New Genre Name</Label>
+                      <Input
+                        id="new_genre_name"
+                        type="text"
+                        value={formData.new_genre_name}
+                        onChange={(e) => handleInputChange('new_genre_name', e.target.value)}
+                        placeholder="Enter new genre name"
+                      />
+                    </>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="duration">Duration</Label>
+                  <Input
+                    id="duration"
+                    type="text"
+                    value={formData.duration}
+                    onChange={(e) => handleInputChange('duration', e.target.value)}
+                    placeholder="e.g., 5h 30m"
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-4">
               <div>
-                <Label htmlFor="genre">Genre *</Label>
-                <Select value={formData.genre} onValueChange={(value) => handleInputChange('genre', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select genre" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Romance">Romance</SelectItem>
-                    <SelectItem value="Thriller">Thriller</SelectItem>
-                    <SelectItem value="Mystery">Mystery</SelectItem>
-                    <SelectItem value="Fiction">Fiction</SelectItem>
-                    <SelectItem value="Biography">Biography</SelectItem>
-                    <SelectItem value="Business">Business</SelectItem>
-                    <SelectItem value="Self Help">Self Help</SelectItem>
-                    <SelectItem value="Science Fiction">Science Fiction</SelectItem>
-                    <SelectItem value="Fantasy">Fantasy</SelectItem>
-                    <SelectItem value="History">History</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="duration">Duration</Label>
-                <Input
-                  id="duration"
-                  type="text"
-                  value={formData.duration}
-                  onChange={(e) => handleInputChange('duration', e.target.value)}
-                  placeholder="e.g., 5h 30m"
+                <Label htmlFor="description">Book Description</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  placeholder="Enter book description"
+                  rows={3}
                 />
               </div>
-            </div>
-
-            <div>
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                placeholder="Enter book description"
-                rows={4}
-              />
+              
+              <div>
+                <Label htmlFor="podcast_description">Podcast Description</Label>
+                <Textarea
+                  id="podcast_description"
+                  value={formData.podcast_description}
+                  onChange={(e) => handleInputChange('podcast_description', e.target.value)}
+                  placeholder="Enter podcast-specific description (this will override book description if provided)"
+                  rows={3}
+                />
+              </div>
             </div>
 
             <div>
