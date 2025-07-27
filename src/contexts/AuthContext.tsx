@@ -30,11 +30,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Handle new user signup via OAuth
+        if (event === 'SIGNED_IN' && session?.user) {
+          // Check if this is a new user by looking at created_at vs last_sign_in_at
+          const user = session.user;
+          const isNewUser = new Date(user.created_at).getTime() === new Date(user.last_sign_in_at || '').getTime();
+          
+          if (isNewUser && window.location.pathname !== '/genre-selection') {
+            // Only redirect new OAuth users to genre selection
+            window.location.href = '/genre-selection';
+          }
+        }
       }
     );
 
