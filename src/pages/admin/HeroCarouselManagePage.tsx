@@ -404,14 +404,14 @@ const HeroCarouselManagePage = () => {
               <div>
                 <Label htmlFor="book_id">Linked Book (Optional)</Label>
                 <Select
-                  value={formData.book_id}
-                  onValueChange={(value) => setFormData({ ...formData, book_id: value })}
+                  value={formData.book_id || "none"}
+                  onValueChange={(value) => setFormData({ ...formData, book_id: value === "none" ? "" : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a book" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No book linked</SelectItem>
+                    <SelectItem value="none">No book linked</SelectItem>
                     {books.map((book) => (
                       <SelectItem key={book.id} value={book.id}>
                         {book.title} - {book.author}
